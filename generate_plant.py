@@ -1,102 +1,108 @@
-'''
-[ItemType]
-name=Aldleaf Seeds;
-ID=aldleafSeeds;
-sprite=483;
-itemCategory=plant;
-spriteWhenHeld=0;
-description=Small, bristly seeds.;
-pR=overworld1;
-pG=pOrange;
-value=2;
-special=canAlwaysFitInTileWhenSpawned;
-weight=0;
-volume=1;
-value=5;
-stackable=false;
-[ItemReaction]
-ID=aldleafSeeds;
-element=growth;
-newID=aldleafPlant;
-[ItemReaction]
-ID=aldleafSeeds;
-element=water;
-newID=aldleafSeeds_watered;
-
-
-'''
-
-import networkx as nx
+import networkx
 from networkx.drawing.nx_pydot import write_dot as _write_dot
-
-class Serialize:
-    def __init__(self, id, properties, sub_types):
-        self.id = id
-        self.properties = properties
-        self.sub_types = sub_types
-
-    def serialize(self):
-        return self._serialize(self)
-
-    def _serialize(self, owner):
-        strings = [f'[{self.__class__.__name__}] ID={owner.id};']
-        for key, value in self.properties.items():
-            if isinstance(value, list):
-                for v in value:
-                    strings.append(f'{key}={v};')
-            else:
-                strings.append(f'{key}={value};')
-        for sub_type in self.sub_types:
-            strings.append(sub_type._serialize(self))
-        return '\n'.join(strings)
-
-
-class ItemReaction(Serialize):
-    def __init__(self, element, newID=None, action=None, spawnItem=None):
-        self.element = element
-        properties = {}
-        if newID:
-            properties['newID'] = newID
-        if action:
-            properties['action'] = action
-        if spawnItem:
-            properties['spawnItem'] = spawnItem
-        super().__init__(None, properties, [])
-
-
-class ItemType(Serialize):
-    def __init__(self, item_id, properties, reactions=None):
-        if reactions is None:
-            reactions = []
-        super().__init__(item_id, properties, reactions)
-
-class Plant:
-    def __init__(self, lifecycle):
-        self.lifecycle = lifecycle
+from boatlib.data import ItemType, ItemReaction, Collection
 
 def define_aldleaf_plant():
-    G = nx.MultiDiGraph()
-    G.add_edge('seeds', 'seeds_watered', element='wet')
-    G.add_edge('seeds_watered', 'sprout', element='newDay')
-    G.add_edge('seeds', 'sprout', element='growth')
-    G.add_edge('sprout', 'plant', element='newDay', count=3, element_targets={'growth': 'plant_deadend'})
-    G.add_edge('plant', 'plant_watered', element='wet')
-    G.add_edge('plant_watered', 'bush', element='newDay', count=7)
-    G.add_edge('bush', 'bush_watered', element='wet')
-    G.add_edge('bush_watered', 'bush', element='newDay', count=7, spawnItem='fruit')
+    G = networkx.MultiDiGraph()
+    G.add_edge('aldleaf', 'aldleafSeeds', element='smash')
+    G.add_edge('aldleafSeeds', 'aldleafSeeds_watered', element='water')
+    G.add_edge('aldleafSeeds_watered', 'aldleafSprout', element='newDay')
+    G.add_edge('aldleafSeeds', 'aldleafSprout', element='growth')
+    G.add_edge('aldleafSprout', 'aldleafPlant_deadend', element='growth')
+    G.add_edge('aldleafSprout', 'aldleafPlant', element='newDay', count=3,
+               description='It will develop leaves in {x} day{s}.',
+               element_targets={'growth': 'aldleafPlant_deadend'})
 
-    G.add_edge('plant', 'plant_withered', element='newDay', count=7,
-               element_targets={'wet': 'plant_watered', 'growth': 'plant'})
-    G.add_edge('bush', 'bush_withered', element='newDay', count=7,
-               element_targets={'wet': 'bush_watered'})
+    G.add_edge('aldleafPlant', 'aldleafPlant_watered', element='water')
+    G.add_edge('aldleafPlant_watered', 'aldleafBush', element='newDay', count=7,
+               description='It will mature in {x} day{s}.',
+               element_targets={'slash': 'aldleaf'})
 
-    G.add_edge('plant_withered', 'plant', element='growth')
-    G.add_edge('bush_withered', 'bush', element='growth')
-    return expand_graph(G)
+    G.add_edge('aldleafBush', 'aldleafBush_watered', element='water')
+    G.add_edge('aldleafBush_watered', 'aldleafBush', element='newDay', count=7,
+               description='It will produce fruit in {x} day{s}.',
+               spawnItem='sleep_fruit', element_targets={'slash': 'aldleafPlant'})
+
+    G.add_edge('aldleafPlant', 'aldleafPlant_wither', element='newDay', count=7,
+               element_targets={'water': 'aldleafPlant_watered', 'growth': 'aldleafPlant', 'slash': 'aldleaf'})
+    G.add_edge('aldleafBush', 'aldleafBush_wither', element='newDay', count=7,
+               element_targets={'water': 'aldleafBush_watered', 'slash': 'aldleafPlant', 'growth': 'aldleafBush'})
+
+    G.add_edge('aldleafPlant_wither', 'aldleafPlant', element='growth')
+    G.add_edge('aldleafBush_wither', 'aldleafBush', element='growth')
+
+    G.add_edge('aldleafPlant_wither', 'aldleaf', element='slash')
+    G.add_edge('aldleafBush_wither', 'aldleafPlant_wither', element='slash')
+
+    G.add_edge('aldleafSprout', 'X', element='slash')
+    G.add_edge('aldleafPlant', 'aldleaf', element='slash')
+    G.add_edge('aldleafPlant_deadend', 'aldleaf', element='slash')
+
+    G.nodes['aldleaf']['properties'] = dict(
+        cloneFrom='aldleaf'
+    )
+    G.nodes['aldleafSeeds']['properties'] = dict(
+        name='Aldleaf Seeds',
+        itemCategory='plant',
+        sprite=483,
+        description='Seeds!'
+    )
+    G.nodes['aldleafSeeds_watered']['properties'] = dict(
+        name='Aldleaf Seeds (Watered)',
+        itemCategory='hide',
+        cloneFrom='aldleafSeeds',
+        special=['dontCloneReactions', 'cannotBePickedUp']
+    )
+    G.nodes['aldleafSprout']['properties'] = dict(
+        name='Aldleaf Sprout',
+        itemCategory='plant',
+        sprite=556,
+        description='It will develop leaves in 3 day.',
+        special='cannotBePickedUp'
+    )
+    G.nodes['aldleafPlant']['properties'] = dict(
+        cloneFrom='aldleafPlant',
+        special='dontCloneReactions',
+        description='It will mature in 7 days if watered.',
+    )
+    G.nodes['aldleafPlant_deadend']['properties'] = dict(
+        cloneFrom='aldleafPlant',
+        special='dontCloneReactions'
+    )
+    G.nodes['aldleafPlant_wither']['properties'] = dict(
+        cloneFrom='aldleafPlant_wither',
+        special='dontCloneReactions'
+    )
+    G.nodes['aldleafPlant_watered']['properties'] = dict(
+        name='Aldleaf Plant (Watered)',
+        itemCategory='hide',
+        cloneFrom='aldleafPlant',
+        special='dontCloneReactions',
+        description='It will mature in 7 days.',
+    )
+    G.nodes['aldleafBush']['properties'] = dict(
+        cloneFrom='aldleafBush',
+        special='dontCloneReactions',
+        description='It will produce fruit in 7 days if watered.',
+    )
+    G.nodes['aldleafBush_wither']['properties'] = dict(
+        cloneFrom='aldleafBush_wither',
+        special='dontCloneReactions'
+    )
+    G.nodes['aldleafBush_watered']['properties'] = dict(
+        name='Aldleaf Bush (Watered)',
+        itemCategory='hide',
+        cloneFrom='aldleafBush',
+        special='dontCloneReactions',
+        description='It will produce fruit in 7 days.',
+    )
+
+    return graph_to_plants(expand_graph(G))
 
 def expand_graph(G):
     to_remove = []
     to_add = []
+    nodes = []
     for e in G.edges:
         edge = G.edges[e]
         if edge['element'] == 'newDay':
@@ -107,8 +113,18 @@ def expand_graph(G):
             head, tail, _ = e
             first = head
 
-            for _ in range(1, edge['count']):
+            for x in range(1, edge['count']):
                 last = first + '_'
+                properties = {
+                    'cloneFrom': first,
+                    'special': 'dontCloneReactions',
+                    'itemCategory': 'hide'
+                }
+                if 'description' in edge:
+                    days = edge['count'] - x
+                    s = 's' if days != 1 else ''
+                    properties['description'] = edge['description'].format(x=days, s=s)
+                nodes.append((last, properties))
                 to_add.append({'__first__': first, '__last__': last, 'element': 'newDay'})
                 first = last
 
@@ -116,6 +132,9 @@ def expand_graph(G):
                     to_add.append({'__first__': first, '__last__': target, 'element': element})
 
             to_add.append({'__first__': first, '__last__': tail, 'element': 'newDay'})
+            spawnItem = edge.get('spawnItem', None)
+            if spawnItem:
+                to_add[-1]['spawnItem'] = spawnItem
 
     for e in to_remove:
         G.remove_edge(*e)
@@ -125,7 +144,30 @@ def expand_graph(G):
         last = e.pop('__last__')
         G.add_edge(first, last, **e)
 
+    for n, p in nodes:
+        G.nodes[n]['properties'] = p
+
     return G
+
+def graph_to_plants(G):
+    items = []
+    for node in G:
+        if node == 'X':
+            continue
+
+        reactions = []
+        for tail in G[node]:
+            edge = G[node][tail][0]
+            element = edge['element']
+            spawnItem = edge.get('spawnItem', None)
+            action = edge.get('action', None)
+            r = ItemReaction(element, newID=tail, spawnItem=spawnItem, action=action)
+            reactions.append(r)
+        i = ItemType(node, reactions=reactions, **G.nodes[node].get('properties', {}))
+        items.append(i)
+
+    return Collection(*items)
+
 
 def write_dot(G, filename):
     for e in G.edges:
@@ -134,9 +176,4 @@ def write_dot(G, filename):
     return _write_dot(G, filename)
 
 if __name__ == '__main__':
-    reactions = [ItemReaction('fire', action='die')]
-    i = ItemType('foo', {'bar': 'baz', 'special': ['a', 'b', 'c']}, reactions=reactions)
-
-    define_aldleaf_plant()
-
-    print(i.serialize())
+    print(define_aldleaf_plant().serialize())
