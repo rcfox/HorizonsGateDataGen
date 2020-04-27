@@ -135,6 +135,8 @@ class Action(Serialize):
     def __init__(self, action_id, aoe=None, av_affecters=None, **kwargs):
         if aoe is None:
             self.aoe = ActionAOE.basic()
+        else:
+            self.aoe = aoe
         if self.aoe.__class__.__name__ != 'ActionAOE':
             raise ValueError('Action aoe must be of type ActionAOE')
 
