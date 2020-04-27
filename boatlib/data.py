@@ -34,6 +34,9 @@ class Serialize:
     def __init__(self, id, properties, subtypes=None):
         self.id = id
         self.properties = properties
+
+        if subtypes is None:
+            subtypes = []
         self.subtypes = subtypes
 
     def serialize(self):
@@ -44,6 +47,8 @@ class Serialize:
             return value
         elif isinstance(value, bool):
             return str(value).lower()
+        elif hasattr(value, 'id'):
+            return value.id
         else:
             return str(value)
 
@@ -77,10 +82,7 @@ class ItemReaction(Serialize):
         if newID:
             properties['newID'] = newID
         if action:
-            if hasattr(action, 'id'):
-                properties['action'] = action.id
-            else:
-                properties['action'] = action
+            properties['action'] = action
         if spawnItem:
             properties['spawnItem'] = spawnItem
         super().__init__(None, properties)
