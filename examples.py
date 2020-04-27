@@ -1,4 +1,3 @@
-import uuid
 
 from boatlib.data import (
     Action,

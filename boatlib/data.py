@@ -1,3 +1,9 @@
+import uuid
+
+def generate_id(prefix):
+    return prefix + str(uuid.uuid4()).replace('-', '')
+
+
 class Duration:
     def __init__(self, *args, **kwargs):
         raise NotImplementedError('do not instantiate Duration directly')
@@ -177,3 +183,37 @@ class AvAffecter(Serialize):
 
 class AvAffecterAOE(ActionAOE):
     pass
+
+class DialogNode(Serialize):
+    def __init__(self, dialog_id=None, statements=None, **kwargs):
+        if dialog_id is None:
+            dialog_id = generate_id('dialog_')
+        if statements is None:
+            statements = []
+
+        animations = []
+        lines = []
+
+        for s in statements:
+            if isinstance(s, str):
+                lines.append(s)
+                animations.append('')
+            else:
+                animation, line = s
+                lines.append(line)
+                animations.append(animation)
+
+        kwargs['animations'] = animations
+        kwargs['statements'] = lines
+
+        super().__init__(dialog_id, kwargs)
+
+    def add_option(self, text, node, **kwargs):
+        self.subtypes.append(DialogOption(text, node, **kwargs))
+        return self
+
+class DialogOption(Serialize):
+    def __init__(self, text, node, **kwargs):
+        kwargs['text'] = text
+        kwargs['nodeToConnectTo'] = node
+        super().__init__(None, kwargs)
