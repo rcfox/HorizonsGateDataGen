@@ -66,6 +66,10 @@ class Serialize:
                 strings.append(subtype._serialize(owner))
         return '\n'.join(strings)
 
+    def collect(self, collection):
+        collection.append(self)
+        return self
+
 class Collection:
     def __init__(self, *items):
         self.items = list(items)
