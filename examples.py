@@ -5,32 +5,26 @@ from boatlib.data import (
     AvAffecter,
     AvAffecterAOE,
     Collection,
+    DialogNode,
     Duration,
     GlobalTrigger,
     GlobalTriggerEffect,
     ItemReaction,
-    ItemType
+    ItemType,
+    generate_id,
 )
-
-def generate_id(prefix):
-    return prefix + str(uuid.uuid4()).replace('-', '')
 
 def callout_action(collection, sayings):
     av_affecters = []
     for say in sayings:
-        trigger_id = generate_id('trigger_say_')
-        trigger = GlobalTrigger(trigger_id, [
-            GlobalTriggerEffect('damageNumber', strings=[say])
-        ])
-        collection.append(trigger)
-
         av_affecters.append(AvAffecter(actorValue='trigger',
-                                       magnitude=trigger.id,
+                                       magnitude=GlobalTrigger(generate_id('trigger_say_'), [
+                                           GlobalTriggerEffect('damageNumber', strings=[say])
+                                       ]).collect(collection),
                                        useSeparateChanceRoll=True,
                                        chance=100 / len(sayings)))
 
-    action_id = generate_id('callout_')
-    action = Action(action_id, av_affecters=av_affecters)
+    action = Action(generate_id('callout_'), av_affecters=av_affecters)
     collection.append(action)
     return action
 
@@ -98,5 +92,24 @@ def evil_boat():
     return Collection(action, boat)
 
 
+def dialog():
+    c = Collection()
+
+    (
+        DialogNode('test_dialog', statements=[
+            'Hi',
+            'This is a test',
+            ('happy', 'Hahahahaha'),
+        ])
+        .add_option('Hi', (DialogNode(statements=['Hey.'])
+                           .add_option('Cool', 'test_dialog')
+                           .collect(c)))
+        .add_option('Bye', (DialogNode(statements=['Aww...'])
+                            .collect(c)))
+        .collect(c)
+    )
+
+    return c
+
 if __name__ == '__main__':
-    print(talking_sword().serialize())
+    print(dialog().serialize())
