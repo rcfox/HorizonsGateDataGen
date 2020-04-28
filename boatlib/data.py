@@ -1,8 +1,16 @@
 import uuid
+import contextlib
+import collections
 
 def generate_id(prefix):
     return prefix + str(uuid.uuid4()).replace('-', '')
 
+@contextlib.contextmanager
+def collect_records():
+    c = Collection()
+    Serialize.push_collection(c)
+    yield c
+    Serialize.pop_collection()
 
 class Duration:
     def __init__(self, *args, **kwargs):
@@ -37,6 +45,8 @@ class Duration:
         return -3 - count
 
 class Serialize:
+    _collection_stack = collections.deque([])
+
     def __init__(self, id, properties, subtypes=None):
         self.id = id
         self.properties = properties
@@ -44,6 +54,17 @@ class Serialize:
         if subtypes is None:
             subtypes = []
         self.subtypes = subtypes
+
+        if len(self._collection_stack) and id is not None:
+            self._collection_stack[-1].append(self)
+
+    @classmethod
+    def push_collection(cls, c):
+        cls._collection_stack.append(c)
+
+    @classmethod
+    def pop_collection(cls):
+        return cls._collection_stack.pop()
 
     def serialize(self):
         return self._serialize(self)
@@ -79,6 +100,9 @@ class Serialize:
 class Collection:
     def __init__(self, *items):
         self.items = list(items)
+
+        if len(Serialize._collection_stack):
+            Serialize._collection_stack[-1].append(self)
 
     def serialize(self):
         return '\n\n'.join(i.serialize() for i in self.items)
