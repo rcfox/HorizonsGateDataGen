@@ -129,6 +129,13 @@ class ItemType(Serialize):
                 properties['special'] = [properties['special']]
         super().__init__(item_id, properties, subtypes=reactions)
 
+    def recipe(self, material, result, consumeOnCombine=False):
+        return ItemType(material,
+                        cloneFrom=material,
+                        combineWith=self,
+                        toMake=result,
+                        consumeOnCombine=consumeOnCombine)
+
 class GlobalTrigger(Serialize):
     def __init__(self, alias_id, effects, **kwargs):
         for p in ('topX', 'topY', 'btmX', 'btmY'):
