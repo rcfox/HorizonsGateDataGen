@@ -275,14 +275,18 @@ def graph_to_plants(G):
         if node == 'X':
             continue
 
+        if 'properties' not in G.nodes[node]:
+            continue
+
         reactions = []
         for tail in G[node]:
-            edge = G[node][tail][0]
-            element = edge['element']
-            spawnItem = edge.get('spawnItem', None)
-            action = edge.get('action', None)
-            r = ItemReaction(element, newID=tail, spawnItem=spawnItem, action=action)
-            reactions.append(r)
+            for i in G[node][tail]:
+                edge = G[node][tail][i]
+                element = edge['element']
+                spawnItem = edge.get('spawnItem', None)
+                action = edge.get('action', None)
+                r = ItemReaction(element, newID=tail, spawnItem=spawnItem, action=action)
+                reactions.append(r)
         ItemType(node, reactions=reactions, **G.nodes[node].get('properties', {}))
 
 def write_dot(G, filename):
