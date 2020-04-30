@@ -2,6 +2,8 @@ import uuid
 import contextlib
 import collections
 
+FURNACE_IDS = ['furnace_lit', 'furnace2_lit', 'furnace_everlit1', 'furnace_everlit2']
+
 def generate_id(prefix):
     return prefix + str(uuid.uuid4()).replace('-', '')
 
@@ -129,12 +131,26 @@ class ItemType(Serialize):
                 properties['special'] = [properties['special']]
         super().__init__(item_id, properties, subtypes=reactions)
 
-    def recipe(self, material, result, consumeOnCombine=False):
+    def recipe(self, material, result, consume_on_combine=False, reverse_with=None):
+        if reverse_with:
+            combine_withs = result.properties.get('combineWith', [])
+            to_makes = result.properties.get('toMake', [])
+            consume_on_combines = result.properties.get('consumeOnCombine', [])
+
+            for r in reverse_with:
+                combine_withs.append(r)
+                to_makes.append(material)
+                consume_on_combines.append(consume_on_combine)
+
+            result.properties['!combineWith'] = ','.join(combine_withs)
+            result.properties['!toMake'] = ','.join(to_makes)
+            result.properties['!consumeOnCombine'] = ','.join([self._str(x) for x in consume_on_combines])
+
         return ItemType(material,
                         cloneFrom=material,
                         combineWith=self,
                         toMake=result,
-                        consumeOnCombine=consumeOnCombine)
+                        consumeOnCombine=consume_on_combine)
 
 class GlobalTrigger(Serialize):
     def __init__(self, alias_id, effects, **kwargs):
