@@ -154,8 +154,11 @@ def define_scythe():
 
         return c
 
-if __name__ == '__main__':
+def define_tools():
     with collect_records() as c:
         define_watering_can()
         define_scythe()
-        print(c.serialize())
+        return c
+
+if __name__ == '__main__':
+    print(define_tools().serialize())
