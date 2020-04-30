@@ -7,13 +7,22 @@ def define_turnip():
     G.add_edge('turnip', 'turnip_seeds', element='smash', spawnItem=['turnip_seeds', 'turnip_seeds'])
     G.add_edge('turnip_seeds', 'turnip_seeds_watered', element='water')
     G.add_edge('turnip_seeds_watered', 'turnip_sprout', element='newDay', count=3,
-               description='It will sprout in {days} day{s}.')
+               description='It will sprout in {days} day{s}.',
+               element_targets={'dig': 'turnip_seeds'})
 
     G.add_edge('turnip_sprout', 'turnip_sprout_watered', element='water')
     G.add_edge('turnip_sprout_watered', 'turnip_mature', element='newDay', count=7,
-               description='It will mature in {days} day{s}.')
+               description='It will mature in {days} day{s}.',
+               element_targets={'fire': 'fire_small',
+                                'slash': 'X'})
 
     G.add_edge('turnip_mature', 'turnip', element='use')
+    G.add_edge('turnip_mature', 'turnip', element='dig')
+
+    G.add_edge('turnip_seeds_watered', 'turnip_seeds', element='dig')
+    G.add_edge('turnip_sprout', 'X', element='slash')
+    G.add_edge('turnip_sprout', 'fire_small', element='fire')
+    G.add_edge('turnip_mature', 'fire_small', element='fire')
 
     G.nodes['turnip']['properties'] = dict(
         name='Turnip',
@@ -64,16 +73,32 @@ def define_wheat():
     G.add_edge('cargo_grain', 'wheat_seeds', element='smash', spawnItem=['wheat_seeds', 'wheat_seeds'])
     G.add_edge('wheat_seeds', 'wheat_seeds_watered', element='water')
     G.add_edge('wheat_seeds_watered', 'wheat_sprout', element='newDay', count=3,
-               description='It will sprout in {days} day{s}.')
+               description='It will sprout in {days} day{s}.',
+               element_targets={'dig': 'wheat_seeds'})
+
+    destruction_elements = {
+        'fire': 'fire_small',
+        'slash': 'X'
+    }
 
     G.add_edge('wheat_sprout', 'wheat_grass', element='newDay', count=5,
-               description='It will reach full length in {days} day{s}.')
+               description='It will reach full length in {days} day{s}.',
+               element_targets=destruction_elements)
     G.add_edge('wheat_grass', 'wheat_grass_flowering', element='newDay', count=6,
-               description='It will flower in {days} day{s}.')
+               description='It will flower in {days} day{s}.',
+               element_targets=destruction_elements)
     G.add_edge('wheat_grass_flowering', 'wheat_ripe', element='newDay', count=7,
-               description='It will ripen in {days} day{s}.')
+               description='It will ripen in {days} day{s}.',
+               element_targets=destruction_elements)
 
     G.add_edge('wheat_ripe', 'cargo_grain', element='slash')
+
+    G.add_edge('wheat_seeds_watered', 'wheat_seeds', element='dig')
+    G.add_edge('wheat_ripe', 'fire', element='fire')
+    for item in ('wheat_sprout', 'wheat_grass', 'wheat_grass_flowering'):
+        for element, target in destruction_elements.items():
+            G.add_edge(item, target, element=element)
+            G.add_edge(item, target, element=element)
 
     G.nodes['cargo_grain']['properties'] = dict(
         cloneFrom='cargo_grain',
