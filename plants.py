@@ -26,6 +26,7 @@ def define_turnip():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=5,
+        description='With some water and time, will grow into a turnip.'
     )
     G.nodes['turnip_seeds_watered']['properties'] = dict(
         name='Turnip Seeds (Watered)',
@@ -38,7 +39,8 @@ def define_turnip():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=2,
-        special='cannotBePickedUp'
+        special='cannotBePickedUp',
+        description='Water it to continue its growth.',
     )
     G.nodes['turnip_sprout_watered']['properties'] = dict(
         name='Turnip Sprout (watered)',
@@ -51,7 +53,73 @@ def define_turnip():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=1,
+        special='cannotBePickedUp',
+        description='Ready to be pulled out of the ground!'
+    )
+
+    return graph_to_plants(expand_graph(G))
+
+def define_wheat():
+    G = networkx.MultiDiGraph()
+    G.add_edge('cargo_grain', 'wheat_seeds', element='smash', spawnItem=['wheat_seeds', 'wheat_seeds'])
+    G.add_edge('wheat_seeds', 'wheat_seeds_watered', element='water')
+    G.add_edge('wheat_seeds_watered', 'wheat_sprout', element='newDay', count=3,
+               description='It will sprout in {days} day{s}.')
+
+    G.add_edge('wheat_sprout', 'wheat_grass', element='newDay', count=5,
+               description='It will reach full length in {days} day{s}.')
+    G.add_edge('wheat_grass', 'wheat_grass_flowering', element='newDay', count=6,
+               description='It will flower in {days} day{s}.')
+    G.add_edge('wheat_grass_flowering', 'wheat_ripe', element='newDay', count=7,
+               description='It will ripen in {days} day{s}.')
+
+    G.add_edge('wheat_ripe', 'cargo_grain', element='slash')
+
+    G.nodes['cargo_grain']['properties'] = dict(
+        cloneFrom='cargo_grain',
+        description='Hard, dry seed. Smash the crate open to get seeds you can plant.'
+    )
+    G.nodes['wheat_seeds']['properties'] = dict(
+        name='Wheat Seeds',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=35,
+        description='With some water and time, will grow into wheat.'
+    )
+    G.nodes['wheat_seeds_watered']['properties'] = dict(
+        name='Wheat Seeds (Watered)',
+        itemCategory='hide',
+        cloneFrom='wheat_seeds',
+        special=['dontCloneReactions', 'cannotBePickedUp']
+    )
+    G.nodes['wheat_sprout']['properties'] = dict(
+        name='Wheat Sprout',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=34,
+        special='cannotBePickedUp',
+    )
+    G.nodes['wheat_grass']['properties'] = dict(
+        name='Wheat Grass',
+        itemCategory='hide',
+        texture='rcfox_farming_crops',
+        sprite=33,
         special='cannotBePickedUp'
+    )
+    G.nodes['wheat_grass_flowering']['properties'] = dict(
+        name='Wheat Grass (flowering)',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=32,
+        special='cannotBePickedUp'
+    )
+    G.nodes['wheat_ripe']['properties'] = dict(
+        name='Wheat (ripe)',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=31,
+        special='cannotBePickedUp',
+        description='Ready to be harvested with a slashing tool.'
     )
 
     return graph_to_plants(expand_graph(G))
@@ -226,6 +294,7 @@ def write_dot(G, filename):
 def define_plants():
     with collect_records() as c:
         define_turnip()
+        define_wheat()
         return c
 
 if __name__ == '__main__':
