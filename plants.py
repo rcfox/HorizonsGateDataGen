@@ -98,7 +98,6 @@ def define_wheat():
     for item in ('wheat_sprout', 'wheat_grass', 'wheat_grass_flowering'):
         for element, target in destruction_elements.items():
             G.add_edge(item, target, element=element)
-            G.add_edge(item, target, element=element)
 
     G.nodes['cargo_grain']['properties'] = dict(
         cloneFrom='cargo_grain',
