@@ -117,7 +117,8 @@ def define_scythe():
                                       av_affecters=[
                                           AvAffecter(aoe=AvAffecterAOE(aoeCasterAsOrigin=True,
                                                                        maxRange=1.5,
-                                                                       coneAngle=90),
+                                                                       coneAngle=90,
+                                                                       maxRangeBonus='w:power - 1'),
                                                      actorValue='HP',
                                                      magnitude='d:spearDmg',
                                                      chance='d:spearAcc',
