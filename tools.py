@@ -86,13 +86,75 @@ def define_watering_can():
                        texture='rcfox_farming_tools',
                        sprite=6,
                        description='Combine this with raw material to create a watering can.')
-        kit.recipe('iron_chunk', 'watering_can_iron')
-        kit.recipe('steel_bar', 'watering_can_steel')
-        kit.recipe('mythril_chunk', 'watering_can_mythril')
+        kit.recipe('woodPlank', wood, reverse_with=FURNACE_IDS)
+        kit.recipe('iron_chunk', iron, reverse_with=FURNACE_IDS)
+        kit.recipe('steel_bar', steel, reverse_with=FURNACE_IDS)
+        kit.recipe('mythril_chunk', mythril, reverse_with=FURNACE_IDS)
+
+        return c
+
+def define_scythe():
+    with collect_records() as c:
+        iron = ItemType('scythe_iron',
+                        name='Iron Scythe',
+                        texture='rcfox_farming_tools',
+                        sprite=3,
+                        pR='pIron', pB='pIronHilt',
+                        itemCategory='weapon',
+                        element='spear',
+                        special=['cannotBeSheathed', 'sprite2xHeight'],
+                        weight=2,
+                        volume=5,
+                        value=25,
+                        power=2,
+                        action=Action('scythe_attack',
+                                      name='Scythe',
+                                      casterAnimation='broadswing',
+                                      casterAnimationDependsOnWeaponHand=True,
+                                      FXChangesWithWeaponHand=True,
+                                      FXOnTarget='swipe',
+                                      aoe=ActionAOE(cloneFrom='adjacent'),
+                                      av_affecters=[
+                                          AvAffecter(aoe=AvAffecterAOE(aoeCasterAsOrigin=True,
+                                                                       maxRange=1.5,
+                                                                       coneAngle=90),
+                                                     actorValue='HP',
+                                                     magnitude='d:spearDmg',
+                                                     chance='d:spearAcc',
+                                                     element=['melee', 'physical', 'slash']),
+                                      ])
+        )
+        wood = ItemType('scythe_wood',
+                        cloneFrom='scythe_iron',
+                        name='Wooden Scythe',
+                        pR='pWood', pB='pWoodDark',
+                        power=1)
+        steel = ItemType('scythe_steel',
+                         cloneFrom='scythe_iron',
+                         name='Steel Scythe',
+                         pR='pSteel', pB='pSteelHilt',
+                         power=3)
+        mythril = ItemType('scythe_mythril',
+                           cloneFrom='scythe_iron',
+                           name='Mythril Scythe',
+                           pR='pMythril', pB='pMythrilHilt',
+                           power=4)
+
+        kit = ItemType('craft_scythe',
+                       cloneFrom='craft_sword',
+                       name='Scythe Crafting Kit',
+                       texture='rcfox_farming_tools',
+                       sprite=6,
+                       description='Combine this with raw material to create a scythe.')
+        kit.recipe('woodPlank', wood, reverse_with=FURNACE_IDS)
+        kit.recipe('iron_chunk', iron, reverse_with=FURNACE_IDS)
+        kit.recipe('steel_bar', steel, reverse_with=FURNACE_IDS)
+        kit.recipe('mythril_chunk', mythril, reverse_with=FURNACE_IDS)
 
         return c
 
 if __name__ == '__main__':
     with collect_records() as c:
         define_watering_can()
+        define_scythe()
         print(c.serialize())
