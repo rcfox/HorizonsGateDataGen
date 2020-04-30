@@ -145,7 +145,7 @@ def define_scythe():
                        cloneFrom='craft_sword',
                        name='Scythe Crafting Kit',
                        texture='rcfox_farming_tools',
-                       sprite=6,
+                       sprite=7,
                        description='Combine this with raw material to create a scythe.')
         kit.recipe('woodPlank', wood, reverse_with=FURNACE_IDS)
         kit.recipe('iron_chunk', iron, reverse_with=FURNACE_IDS)
