@@ -33,7 +33,6 @@ def define_watering_can():
                         value=25,
                         power=2,
                         action=Action('watering_can_use',
-                                      name='Watering Can',
                                       casterAnimation='use',
                                       casterAnimationDependsOnWeaponHand=True,
                                       special='cantUseInCombat',
@@ -108,7 +107,6 @@ def define_scythe():
                         value=25,
                         power=2,
                         action=Action('scythe_attack',
-                                      name='Scythe',
                                       casterAnimation='broadswing',
                                       casterAnimationDependsOnWeaponHand=True,
                                       FXChangesWithWeaponHand=True,
@@ -154,10 +152,79 @@ def define_scythe():
 
         return c
 
+def define_hoe():
+    with collect_records() as c:
+        iron = ItemType('hoe_iron',
+                        name='Iron Hoe',
+                        texture='rcfox_farming_tools',
+                        sprite=2,
+                        pR='pIron', pB='pIronHilt',
+                        itemCategory='weapon',
+                        element='spear',
+                        special=['cannotBeSheathed', 'sprite2xHeight'],
+                        weight=2,
+                        volume=5,
+                        value=25,
+                        power=2,
+                        action=Action('hoe_attack',
+                                      casterAnimation='spear',
+                                      casterAnimationDependsOnWeaponHand=True,
+                                      FXChangesWithWeaponHand=True,
+                                      FXOnTarget='stab',
+                                      aoe=ActionAOE(
+                                          shape=2,
+	                                  needsLoS=True,
+	                                  needsLoE=False,
+	                                  airborne=True,
+	                                  minRange=1,
+	                                  maxRange=2,
+                                          maxRangeBonus='w:power - 1',
+	                                  bypassAll=False,
+	                                  occupyAll=True),
+                                      av_affecters=[
+                                          AvAffecter(aoe=AvAffecterAOE(aoeCasterAsOrigin=True,
+                                                                       coneAngle=1),
+                                                     actorValue='HP',
+                                                     magnitude='d:spearDmg',
+                                                     chance='d:spearAcc',
+                                                     element=['melee', 'physical', 'dig']),
+                                      ])
+        )
+        wood = ItemType('hoe_wood',
+                        cloneFrom='hoe_iron',
+                        name='Wooden Hoe',
+                        pR='pWood', pB='pWoodDark',
+                        power=1)
+        steel = ItemType('hoe_steel',
+                         cloneFrom='hoe_iron',
+                         name='Steel Hoe',
+                         pR='pSteel', pB='pSteelHilt',
+                         power=3)
+        mythril = ItemType('hoe_mythril',
+                           cloneFrom='hoe_iron',
+                           name='Mythril Hoe',
+                           pR='pMythril', pB='pMythrilHilt',
+                           power=4)
+
+        kit = ItemType('craft_hoe',
+                       cloneFrom='craft_sword',
+                       name='Hoe Crafting Kit',
+                       texture='rcfox_farming_tools',
+                       sprite=12,
+                       description='Combine this with raw material to create a hoe.')
+        kit.recipe('woodPlank', wood, reverse_with=FURNACE_IDS)
+        kit.recipe('iron_chunk', iron, reverse_with=FURNACE_IDS)
+        kit.recipe('steel_bar', steel, reverse_with=FURNACE_IDS)
+        kit.recipe('mythril_chunk', mythril, reverse_with=FURNACE_IDS)
+
+        return c
+
+
 def define_tools():
     with collect_records() as c:
         define_watering_can()
         define_scythe()
+        define_hoe()
         return c
 
 if __name__ == '__main__':
