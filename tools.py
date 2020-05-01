@@ -111,6 +111,7 @@ def define_scythe():
                                       casterAnimationDependsOnWeaponHand=True,
                                       FXChangesWithWeaponHand=True,
                                       FXOnTarget='swipe',
+                                      special='cantUseInCombat',
                                       aoe=ActionAOE(cloneFrom='adjacent'),
                                       av_affecters=[
                                           AvAffecter(aoe=AvAffecterAOE(aoeCasterAsOrigin=True,
@@ -171,6 +172,7 @@ def define_hoe():
                                       casterAnimationDependsOnWeaponHand=True,
                                       FXChangesWithWeaponHand=True,
                                       FXOnTarget='stab',
+                                      special='cantUseInCombat',
                                       aoe=ActionAOE(
                                           shape=2,
 	                                  needsLoS=True,
