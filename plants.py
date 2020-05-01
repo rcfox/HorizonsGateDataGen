@@ -121,28 +121,28 @@ def define_wheat():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=34,
-        special='cannotBePickedUp',
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
     )
     G.nodes['wheat_grass']['properties'] = dict(
         name='Wheat Grass',
         itemCategory='hide',
         texture='rcfox_farming_crops',
         sprite=33,
-        special='cannotBePickedUp'
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
     )
     G.nodes['wheat_grass_flowering']['properties'] = dict(
         name='Wheat Grass (flowering)',
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=32,
-        special='cannotBePickedUp'
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
     )
     G.nodes['wheat_ripe']['properties'] = dict(
         name='Wheat (ripe)',
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=31,
-        special='cannotBePickedUp',
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
         description='Ready to be harvested with a slashing tool.'
     )
 
