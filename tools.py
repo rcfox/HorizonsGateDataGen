@@ -227,7 +227,7 @@ def define_hoe():
 def define_craftable_fences():
     with collect_records() as c:
         original_wood_fence_types = ['fence_Mid', 'fence_NW', 'fence_N', 'fence_NE',
-                                      'fence_E', 'fence_SE', 'fence_SW', 'fence_W']
+                                     'fence_E', 'fence_SE', 'fence_SW', 'fence_W']
         wood_fences = [
             ItemType(f'{fence}_crafted',
                      cloneFrom=fence,
