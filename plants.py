@@ -48,21 +48,21 @@ def define_turnip():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=2,
-        special='cannotBePickedUp',
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
         description='Water it to continue its growth.',
     )
     G.nodes['turnip_sprout_watered']['properties'] = dict(
         name='Turnip Sprout (watered)',
         itemCategory='hide',
         cloneFrom='turnip_sprout',
-        special=['dontCloneReactions', 'cannotBePickedUp']
+        special=['dontCloneReactions', 'cannotBePickedUp', 'adjustSpriteYUp8']
     )
     G.nodes['turnip_mature']['properties'] = dict(
         name='Turnip (mature)',
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=1,
-        special='cannotBePickedUp',
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
         description='Ready to be pulled out of the ground!'
     )
 
