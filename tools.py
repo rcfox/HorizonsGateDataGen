@@ -231,6 +231,7 @@ def define_craftable_fences():
         wood_fences = [
             ItemType(f'{fence}_crafted',
                      cloneFrom=fence,
+                     description='Use an axe to chop it down.',
                      reactions=[
                          ItemReaction(element='heavySlash', newID='woodPlank')
                      ])
