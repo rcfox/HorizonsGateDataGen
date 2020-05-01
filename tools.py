@@ -219,12 +219,35 @@ def define_hoe():
 
         return c
 
+def define_craftable_fences():
+    with collect_records() as c:
+        original_wood_fence_types = ['fence_Mid', 'fence_NW', 'fence_N', 'fence_NE',
+                                      'fence_E', 'fence_SE', 'fence_SW', 'fence_W']
+        wood_fences = [
+            ItemType(f'{fence}_crafted',
+                     cloneFrom=fence,
+                     reactions=[
+                         ItemReaction(element='heavySlash', newID='woodPlank')
+                     ])
+            for fence in original_wood_fence_types
+        ]
+
+        kit = ItemType('craft_fence',
+                       cloneFrom='craft_sword',
+                       name='Fence Crafting Kit',
+                       texture='rcfox_farming_tools',
+                       sprite=13,
+                       description='Combine this with wood planks to create a fence, or with a fence to change the fence direction.')
+        kit.recipe('woodPlank', wood_fences[0])
+        for fence1, fence2 in zip(wood_fences, wood_fences[1:] + wood_fences[:1]):
+            kit.recipe(fence1.id, fence2.id)
 
 def define_tools():
     with collect_records() as c:
         define_watering_can()
         define_scythe()
         define_hoe()
+        define_craftable_fences()
         return c
 
 if __name__ == '__main__':
