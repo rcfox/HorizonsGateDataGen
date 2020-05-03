@@ -116,15 +116,8 @@ class Collection:
         self.items.append(item)
 
 class ItemReaction(Serialize):
-    def __init__(self, element, newID=None, action=None, spawnItem=None):
-        properties = {'element': element}
-        if newID:
-            properties['newID'] = newID
-        if action:
-            properties['action'] = action
-        if spawnItem:
-            properties['spawnItem'] = spawnItem
-        super().__init__(None, properties)
+    def __init__(self, **kwargs):
+        super().__init__(None, kwargs)
 
 class ItemType(Serialize):
     def __init__(self, item_id, reactions=None, **kwargs):
