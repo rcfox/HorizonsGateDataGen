@@ -261,3 +261,19 @@ class DialogOption(Serialize):
         kwargs['nodeToConnectTo'] = node
         option_id = kwargs.pop('ID', __NO_ID__)
         super().__init__(option_id, kwargs)
+
+class ActorPrefab(Serialize):
+    # I think there's more to this, but it's all I need for now.
+    def __init__(self, prefab_id, **kwargs):
+        super().__init__(prefab_id, kwargs)
+
+class ActorType(Serialize):
+    def __init__(self, actor_id, reactions=None, **kwargs):
+        properties = dict(kwargs)
+        if 'special' in properties:
+            if not isinstance(properties['special'], list):
+                properties['special'] = [properties['special']]
+        super().__init__(actor_id, properties, subtypes=reactions)
+
+class ActorTypeReaction(ItemReaction):
+    pass
