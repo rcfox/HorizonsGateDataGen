@@ -4,6 +4,8 @@ import collections
 
 FURNACE_IDS = ['furnace_lit', 'furnace2_lit', 'furnace_everlit1', 'furnace_everlit2']
 
+__NO_ID__ = object()
+
 def generate_id(prefix):
     return prefix + str(uuid.uuid4()).replace('-', '')
 
@@ -57,7 +59,7 @@ class Serialize:
             subtypes = []
         self.subtypes = subtypes
 
-        if len(self._collection_stack) and id is not None:
+        if len(self._collection_stack) and id is not None and id is not __NO_ID__:
             self._collection_stack[-1].append(self)
 
     @classmethod
@@ -82,8 +84,9 @@ class Serialize:
             return str(value)
 
     def _serialize(self, owner):
-        strings = [f'[{self.__class__.__name__}]',
-                   f'    ID={owner.id};']
+        strings = [f'[{self.__class__.__name__}]']
+        if self.id is not __NO_ID__:
+            strings.append(f'    ID={owner.id};')
         for key, value in self.properties.items():
             if isinstance(value, list):
                 for v in value:
@@ -263,4 +266,5 @@ class DialogOption(Serialize):
     def __init__(self, text, node, **kwargs):
         kwargs['text'] = text
         kwargs['nodeToConnectTo'] = node
-        super().__init__(None, kwargs)
+        option_id = kwargs.pop('ID', __NO_ID__)
+        super().__init__(option_id, kwargs)
