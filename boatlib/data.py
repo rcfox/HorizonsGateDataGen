@@ -90,9 +90,11 @@ class Serialize:
         for key, value in self.properties.items():
             if isinstance(value, list):
                 for v in value:
-                    strings.append(f'    {key}={self._str(v)};')
+                    if v is not None:
+                        strings.append(f'    {key}={self._str(v)};')
             else:
-                strings.append(f'    {key}={self._str(value)};')
+                if value is not None:
+                    strings.append(f'    {key}={self._str(value)};')
         if self.subtypes:
             for subtype in self.subtypes:
                 strings.append(subtype._serialize(owner))
