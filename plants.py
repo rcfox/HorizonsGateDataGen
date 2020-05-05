@@ -1,6 +1,19 @@
 import networkx
 from networkx.drawing.nx_pydot import write_dot as _write_dot
-from boatlib.data import ItemType, ItemReaction, Collection, collect_records
+from boatlib.data import (
+    Action,
+    ActionAOE,
+    ActorPrefab,
+    ActorType,
+    AvAffecter,
+    AvAffecterAOE,
+    GlobalTrigger,
+    GlobalTriggerEffect,
+    ItemReaction,
+    ItemType,
+    collect_records,
+    generate_id
+)
 
 def define_turnip():
     G = networkx.MultiDiGraph()
@@ -14,15 +27,48 @@ def define_turnip():
     G.add_edge('turnip_sprout_watered', 'turnip_mature', element='newDay', count=7,
                description='It will mature in {days} day{s}.',
                element_targets={'fire': 'fire_small',
-                                'slash': 'X'})
-
-    G.add_edge('turnip_mature', 'turnip', element='use')
-    G.add_edge('turnip_mature', 'turnip', element='dig')
+                                'slash': 'X'},
+               action=Action('reset_turnip_ambush',
+                             av_affecters=[
+                                 AvAffecter(actorValue='trigger',
+                                            magnitude=GlobalTrigger('toggle_turnip_ambush_on',
+                                                                    [
+                                                                        GlobalTriggerEffect('setGlobalVar',
+                                                                                            strings=['turnip_ambush'],
+                                                                                            floats=[0])
+                                                                    ]))
+                             ]))
 
     G.add_edge('turnip_seeds_watered', 'turnip_seeds', element='dig')
     G.add_edge('turnip_sprout', 'X', element='slash')
     G.add_edge('turnip_sprout', 'fire_small', element='fire')
     G.add_edge('turnip_mature', 'fire_small', element='fire')
+
+    spider = ActorPrefab('turnip_spide',
+                         hostile=True,
+                         faction='player',
+                         combatTeam='spide',
+                         aiScript='idle',
+                         actorTypeID=ActorType('turnip_spide',
+                                               cloneFrom='spide',
+                                               defaultAI='idle',
+                                               innateActions=Action('turnip_spide_charge_attack',
+                                                                    name='Munch',
+                                                                    applyWeaponBuffs=True,
+                                                                    chargeTime=25,
+                                                                    AIRatingBonus=100,
+                                                                    casterAnimation='s_simpleAttack',
+                                                                    special=['requiresCharging', 'cancelChargingOnMove'],
+                                                                    aoe=ActionAOE(cloneFrom='adjacent'),
+                                                                    av_affecters=[
+                                                                        AvAffecter(actorValue='HP',
+                                                                                   magnitude='d:fistDmg * 1.2',
+                                                                                   chance='d:fistAcc',
+                                                                                   weaponAvAffecter=True,
+                                                                                   element=['physical', 'melee', 'smash', 'fakeElec'],
+                                                                                   FXOnTile=['pop', 'smash'],)
+                                                                    ])
+                         ))
 
     G.nodes['turnip']['properties'] = dict(
         name='Turnip',
@@ -63,7 +109,36 @@ def define_turnip():
         texture='rcfox_farming_crops',
         sprite=1,
         special=['cannotBePickedUp', 'adjustSpriteYUp8'],
-        description='Ready to be pulled out of the ground!'
+        description='Ready to be pulled out of the ground!',
+        reactions=[
+            ItemReaction(element='fakeElec',
+                         newID='X',
+                         aiRatingMod=999,
+                         aiRatingModForHostilesOnly=True),
+            ItemReaction(element=['use', 'dig'],
+                         newID='turnip',
+                         action=Action('activate_turnip_ambush',
+                                       av_affecters=[
+                                           AvAffecter(actorValue='summonActor',
+                                                      magnitude=spider,
+                                                      useSeparateChanceRoll=True,
+                                                      chance='9 * gIs0:turnip_ambush + 0.1 * itemsZone:turnip_mature',
+                                                      aoe=AvAffecterAOE(cloneFrom='land_search',
+                                                                        minRange=4,
+                                                                        maxRange=6)),
+                                           AvAffecter(actorValue='trigger',
+                                                      chance='100 * gIs0:turnip_ambush',
+                                                      magnitude=GlobalTrigger('turnip_ambush',
+                                                                              [
+                                                                                  GlobalTriggerEffect('setGlobalVar',
+                                                                                                      strings=['turnip_ambush'],
+                                                                                                      floats=[1]),
+                                                                                  GlobalTriggerEffect('enterCombat',
+                                                                                                      floats=[99999]),
+                                                                              ])),
+                                       ])
+            )
+        ]
     )
 
     return graph_to_plants(expand_graph(G))
@@ -279,6 +354,9 @@ def expand_graph(G):
             spawnItem = edge.get('spawnItem', None)
             if spawnItem:
                 to_add[-1]['spawnItem'] = spawnItem
+            action = edge.get('action', None)
+            if action:
+                to_add[-1]['action'] = action
 
     for e in to_remove:
         G.remove_edge(*e)
@@ -309,9 +387,12 @@ def graph_to_plants(G):
                 element = edge['element']
                 spawnItem = edge.get('spawnItem', None)
                 action = edge.get('action', None)
-                r = ItemReaction(element, newID=tail, spawnItem=spawnItem, action=action)
+                r = ItemReaction(element=element, newID=tail, spawnItem=spawnItem, action=action)
                 reactions.append(r)
-        ItemType(node, reactions=reactions, **G.nodes[node].get('properties', {}))
+        props = G.nodes[node].get('properties', {})
+        if 'reactions' in props:
+            reactions.extend(props.pop('reactions'))
+        ItemType(node, reactions=reactions, **props)
 
 def write_dot(G, filename):
     for e in G.edges:
