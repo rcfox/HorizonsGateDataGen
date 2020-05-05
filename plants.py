@@ -49,9 +49,8 @@ def define_turnip():
                          faction='player',
                          combatTeam='spide',
                          aiScript='idle',
-                         actorTypeID=ActorType('turnip_spide',
+                         actorTypeID=ActorType('spide',
                                                cloneFrom='spide',
-                                               defaultAI='idle',
                                                innateActions=Action('turnip_spide_charge_attack',
                                                                     name='Munch',
                                                                     applyWeaponBuffs=True,
@@ -65,16 +64,22 @@ def define_turnip():
                                                                                    magnitude='d:fistDmg * 1.2',
                                                                                    chance='d:fistAcc',
                                                                                    weaponAvAffecter=True,
-                                                                                   element=['physical', 'melee', 'smash', 'fakeElec'],
+                                                                                   element=['physical', 'melee', 'fakeElec'],
                                                                                    FXOnTile=['pop', 'smash'],)
                                                                     ])
                          ))
+
+    spider_eat_turnip = ItemReaction(element='fakeElec',
+                                     newID='X',
+                                     aiRatingMod=999,
+                                     aiRatingModForHostilesOnly=True)
 
     G.nodes['turnip']['properties'] = dict(
         name='Turnip',
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=0,
+        reactions=[spider_eat_turnip]
     )
     G.nodes['turnip_seeds']['properties'] = dict(
         name='Turnip Seeds',
@@ -111,10 +116,7 @@ def define_turnip():
         special=['cannotBePickedUp', 'adjustSpriteYUp8'],
         description='Ready to be pulled out of the ground!',
         reactions=[
-            ItemReaction(element='fakeElec',
-                         newID='X',
-                         aiRatingMod=999,
-                         aiRatingModForHostilesOnly=True),
+            spider_eat_turnip,
             ItemReaction(element=['use', 'dig'],
                          newID='turnip',
                          action=Action('activate_turnip_ambush',
