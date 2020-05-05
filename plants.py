@@ -124,7 +124,7 @@ def define_turnip():
                                            AvAffecter(actorValue='summonActor',
                                                       magnitude=spider,
                                                       useSeparateChanceRoll=True,
-                                                      chance='9 * gIs0:turnip_ambush + 0.1 * itemsZone:turnip_mature',
+                                                      chance='9 * gIs0:turnip_ambush + 0.1 * gIs0:turnip_ambush * itemsZone:turnip_mature',
                                                       aoe=AvAffecterAOE(cloneFrom='land_search',
                                                                         minRange=4,
                                                                         maxRange=6)),
