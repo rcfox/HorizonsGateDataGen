@@ -66,14 +66,14 @@ def define_dummy():
         return c
 
 def add_dialog(item):
-    buy_node = DialogNode('port6_dojo_buy_dummy',
+    buy_node = DialogNode('dojo_buy_dummy',
                           statements=[
                               'How would you like to buy this dehydrated training dummy?',
                               'Just place the seed on the ground and add water!',
                               'You can even dispel it when you want to pack it back up.',
                           ])
     buy_node.add_option('Yes ($1,000)',
-                        DialogNode('port6_dojo_buy_dummy_yes',
+                        DialogNode('dojo_buy_dummy_yes',
                                    statements=[
                                        ('happy', 'Here you go!')
                                    ],
@@ -88,21 +88,11 @@ def add_dialog(item):
                         formulaReq='1000 - m:money')
     buy_node.add_option('No', 'previous', newLineOfOptions=True)
 
-
-    train_node = DialogNode('port6_dojo3',
-                            statements=['Hey there <pname=>.<p> Are you here to train?'])
-    train_node.add_option('Hammer Skill<adjX=3><iconBig=skill_Hammer> Training', 'port6_dojo3_train',
-                          formulaReq='1-g:skill_Hammer_bonus')
-    train_node.add_option('Buy a training dummy', buy_node, newLineOfOptions=True)
-    train_node.add_option('Goodbye', '', bottomOption=True)
-
-    finished_node = DialogNode('port6_dojo4',
-                               statements=[
-                                   ('sly', '''Hey <pname=>.<p> How's our training working for you?'''),
-                                   ('happy', '''Come back whenever.<p> I'd hate for you to forget how to hold a hammer.''')
-                               ])
-    finished_node.add_option('Buy a training dummy', buy_node)
-    finished_node.add_option('Goodbye', '', bottomOption=True)
+    for port in (6, 7, 12, 15, 20, 21, 29):
+        for node in (f'port{port}_dojo3', f'port{port}_dojo4'):
+            DialogOption('Buy a training dummy', buy_node,
+                         newLineOfOptions=True,
+                         ID=node)
 
 if __name__ == '__main__':
     print(define_dummy().serialize())
