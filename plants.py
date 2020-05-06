@@ -15,6 +15,93 @@ from boatlib.data import (
     generate_id
 )
 
+MONSTER_EAT_CROP = ItemReaction(element='fakeElec',
+                                newID='X',
+                                aiRatingMod=999,
+                                aiRatingModForHostilesOnly=True)
+
+def define_ambush(crops):
+    Action('reset_crop_harvest_ambush',
+           av_affecters=[
+               AvAffecter(actorValue='trigger',
+                          magnitude=GlobalTrigger('toggle_crop_harvest_ambush_on',
+                                                  [
+                                                      GlobalTriggerEffect('setGlobalVar',
+                                                                          strings=['crop_harvest_ambush'],
+                                                                          floats=[0])
+                                                  ]))
+           ])
+
+    munch_crop = Action('munch_crop_attack',
+           name='Munch',
+           applyWeaponBuffs=True,
+           chargeTime=25,
+           AIRatingBonus=100,
+           casterAnimation='s_simpleAttack',
+           special=['requiresCharging', 'cancelChargingOnMove'],
+           aoe=ActionAOE(cloneFrom='adjacent'),
+           av_affecters=[
+               AvAffecter(actorValue='HP',
+                          magnitude='d:fistDmg * 1.2',
+                          chance='d:fistAcc',
+                          weaponAvAffecter=True,
+                          element=['physical', 'melee', 'fakeElec'],
+                          FXOnTile=['pop', 'smash'],)
+           ])
+
+    monsters = [
+        ActorPrefab(f'crop_{monster}',
+                    hostile=True,
+                    faction='player',
+                    combatTeam='crop_monster',
+                    aiScript='idle',
+                    actorTypeID=ActorType(monster,
+                                          cloneFrom=monster,
+                                          innateActions=munch_crop))
+        for monster in ['spide', 'cattle']
+    ]
+
+    spawn_chances = {}
+    for i, monster in enumerate(monsters):
+        spawn_chance = [f'9 * gIs0:crop_harvest_ambush * gIs{i}:crop_harvest_ambush_monster']
+        for crop_mature, crop_result in crops:
+            spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * gIs{i}:crop_harvest_ambush_monster * itemsZone:{crop_mature}')
+            spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * gIs{i}:crop_harvest_ambush_monster * itemsZone:{crop_result}')
+        spawn_chances[monster.id] = ' + '.join(spawn_chance)
+
+    affecters = [
+        AvAffecter(actorValue='trigger',
+                   chance='100 * gIs0:crop_harvest_ambush',
+                   magnitude=GlobalTrigger('crop_harvest_ambush_random_monster',
+                                           [
+                                               GlobalTriggerEffect('setGlobalVar_math',
+                                                                   strings=['crop_harvest_ambush_monster',
+                                                                            'm:rand'])
+                                           ]))
+    ]
+    for monster in monsters:
+        affecters.append(AvAffecter(actorValue='summonActor',
+                                    magnitude=monster,
+                                    useSeparateChanceRoll=True,
+                                    chance=spawn_chances[monster.id],
+                                    aoe=AvAffecterAOE(cloneFrom='land_search',
+                                                      minRange=4,
+                                                      maxRange=6)))
+
+    affecters.append(AvAffecter(actorValue='trigger',
+                                chance='100 * gIs0:crop_harvest_ambush',
+                                magnitude=GlobalTrigger('crop_harvest_ambush',
+                                                        [
+                                                            GlobalTriggerEffect('setGlobalVar',
+                                                                                strings=['crop_harvest_ambush'],
+                                                                                floats=[1]),
+                                                            GlobalTriggerEffect('enterCombat',
+                                                                                floats=[99999]),
+                                                        ])))
+
+    Action('activate_crop_harvest_ambush',
+           av_affecters=affecters)
+
 def define_turnip():
     G = networkx.MultiDiGraph()
     G.add_edge('turnip', 'turnip_seeds', element='smash', spawnItem=['turnip_seeds', 'turnip_seeds'])
@@ -28,58 +115,19 @@ def define_turnip():
                description='It will mature in {days} day{s}.',
                element_targets={'fire': 'fire_small',
                                 'slash': 'X'},
-               action=Action('reset_turnip_ambush',
-                             av_affecters=[
-                                 AvAffecter(actorValue='trigger',
-                                            magnitude=GlobalTrigger('toggle_turnip_ambush_on',
-                                                                    [
-                                                                        GlobalTriggerEffect('setGlobalVar',
-                                                                                            strings=['turnip_ambush'],
-                                                                                            floats=[0])
-                                                                    ]))
-                             ]))
+               action='reset_crop_harvest_ambush')
 
     G.add_edge('turnip_seeds_watered', 'turnip_seeds', element='dig')
     G.add_edge('turnip_sprout', 'X', element='slash')
     G.add_edge('turnip_sprout', 'fire_small', element='fire')
     G.add_edge('turnip_mature', 'fire_small', element='fire')
 
-    spider = ActorPrefab('turnip_spide',
-                         hostile=True,
-                         faction='player',
-                         combatTeam='spide',
-                         aiScript='idle',
-                         actorTypeID=ActorType('spide',
-                                               cloneFrom='spide',
-                                               innateActions=Action('turnip_spide_charge_attack',
-                                                                    name='Munch',
-                                                                    applyWeaponBuffs=True,
-                                                                    chargeTime=25,
-                                                                    AIRatingBonus=100,
-                                                                    casterAnimation='s_simpleAttack',
-                                                                    special=['requiresCharging', 'cancelChargingOnMove'],
-                                                                    aoe=ActionAOE(cloneFrom='adjacent'),
-                                                                    av_affecters=[
-                                                                        AvAffecter(actorValue='HP',
-                                                                                   magnitude='d:fistDmg * 1.2',
-                                                                                   chance='d:fistAcc',
-                                                                                   weaponAvAffecter=True,
-                                                                                   element=['physical', 'melee', 'fakeElec'],
-                                                                                   FXOnTile=['pop', 'smash'],)
-                                                                    ])
-                         ))
-
-    spider_eat_turnip = ItemReaction(element='fakeElec',
-                                     newID='X',
-                                     aiRatingMod=999,
-                                     aiRatingModForHostilesOnly=True)
-
     G.nodes['turnip']['properties'] = dict(
         name='Turnip',
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=0,
-        reactions=[spider_eat_turnip]
+        reactions=[MONSTER_EAT_CROP]
     )
     G.nodes['turnip_seeds']['properties'] = dict(
         name='Turnip Seeds',
@@ -116,34 +164,15 @@ def define_turnip():
         special=['cannotBePickedUp', 'adjustSpriteYUp8'],
         description='Ready to be pulled out of the ground!',
         reactions=[
-            spider_eat_turnip,
+            MONSTER_EAT_CROP,
             ItemReaction(element=['use', 'dig'],
                          newID='turnip',
-                         action=Action('activate_turnip_ambush',
-                                       av_affecters=[
-                                           AvAffecter(actorValue='summonActor',
-                                                      magnitude=spider,
-                                                      useSeparateChanceRoll=True,
-                                                      chance='9 * gIs0:turnip_ambush + 0.1 * gIs0:turnip_ambush * itemsZone:turnip_mature',
-                                                      aoe=AvAffecterAOE(cloneFrom='land_search',
-                                                                        minRange=4,
-                                                                        maxRange=6)),
-                                           AvAffecter(actorValue='trigger',
-                                                      chance='100 * gIs0:turnip_ambush',
-                                                      magnitude=GlobalTrigger('turnip_ambush',
-                                                                              [
-                                                                                  GlobalTriggerEffect('setGlobalVar',
-                                                                                                      strings=['turnip_ambush'],
-                                                                                                      floats=[1]),
-                                                                                  GlobalTriggerEffect('enterCombat',
-                                                                                                      floats=[99999]),
-                                                                              ])),
-                                       ])
-            )
+                         action='activate_crop_harvest_ambush')
         ]
     )
+    graph_to_plants(expand_graph(G))
 
-    return graph_to_plants(expand_graph(G))
+    return 'turnip_mature', 'turnip'
 
 def define_wheat():
     G = networkx.MultiDiGraph()
@@ -166,9 +195,8 @@ def define_wheat():
                element_targets=destruction_elements)
     G.add_edge('wheat_grass_flowering', 'wheat_ripe', element='newDay', count=7,
                description='It will ripen in {days} day{s}.',
-               element_targets=destruction_elements)
-
-    G.add_edge('wheat_ripe', 'cargo_grain', element='slash')
+               element_targets=destruction_elements,
+               action='reset_crop_harvest_ambush')
 
     G.add_edge('wheat_seeds_watered', 'wheat_seeds', element='dig')
     G.add_edge('wheat_ripe', 'fire', element='fire')
@@ -178,7 +206,8 @@ def define_wheat():
 
     G.nodes['cargo_grain']['properties'] = dict(
         cloneFrom='cargo_grain',
-        description='Hard, dry seed. Smash the crate open to get seeds you can plant.'
+        description='Hard, dry seed. Smash the crate open to get seeds you can plant.',
+        reactions=[MONSTER_EAT_CROP]
     )
     G.nodes['wheat_seeds']['properties'] = dict(
         name='Wheat Seeds',
@@ -220,10 +249,17 @@ def define_wheat():
         texture='rcfox_farming_crops',
         sprite=31,
         special=['cannotBePickedUp', 'adjustSpriteYUp8'],
-        description='Ready to be harvested with a slashing tool.'
+        description='Ready to be harvested with a slashing tool.',
+        reactions=[
+            MONSTER_EAT_CROP,
+            ItemReaction(element=['slash'],
+                         newID='cargo_grain',
+                         action='activate_crop_harvest_ambush')
+        ]
     )
+    graph_to_plants(expand_graph(G))
 
-    return graph_to_plants(expand_graph(G))
+    return 'wheat_ripe', 'cargo_grain'
 
 def define_aldleaf_plant():
     G = networkx.MultiDiGraph()
@@ -404,8 +440,11 @@ def write_dot(G, filename):
 
 def define_plants():
     with collect_records() as c:
-        define_turnip()
-        define_wheat()
+        crops = [
+            define_turnip(),
+            define_wheat()
+        ]
+        define_ambush(crops)
         return c
 
 if __name__ == '__main__':
