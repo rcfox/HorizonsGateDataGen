@@ -266,6 +266,96 @@ def define_wheat():
 
     return 'wheat_ripe', 'cargo_grain'
 
+
+def define_corn():
+    G = networkx.MultiDiGraph()
+    G.add_edge('corn', 'corn_seeds', element='smash', spawnItem=['corn_seeds', 'corn_seeds'])
+    G.add_edge('corn_seeds', 'corn_seeds_watered', element='water')
+    G.add_edge('corn_seeds_watered', 'corn_sprout', element='newDay', count=3,
+               description='It will sprout in {days} day{s}.',
+               element_targets={'dig': 'corn_seeds'})
+
+    destruction_elements = {
+        'fire': 'fire_small',
+        'slash': 'X'
+    }
+
+    G.add_edge('corn_sprout', 'corn_grass', element='newDay', count=3,
+               description='It will reach full length in {days} day{s}.',
+               element_targets=destruction_elements)
+    G.add_edge('corn_stalk', 'corn_stalk_flowering', element='newDay', count=8,
+               description='It will flower in {days} day{s}.',
+               element_targets=destruction_elements)
+    G.add_edge('corn_stalk_flowering', 'corn_ripe', element='newDay', count=9,
+               description='It will ripen in {days} day{s}.',
+               element_targets=destruction_elements,
+               action='reset_crop_harvest_ambush')
+
+    G.add_edge('corn_seeds_watered', 'corn_seeds', element='dig')
+    G.add_edge('corn_ripe', 'fire', element='fire')
+    for item in ('corn_sprout', 'corn_stalk', 'corn_stalk_flowering'):
+        for element, target in destruction_elements.items():
+            G.add_edge(item, target, element=element)
+
+    G.nodes['corn']['properties'] = dict(
+        name='Corn',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=54,
+        reactions=[MONSTER_EAT_CROP]
+    )
+    G.nodes['corn_seeds']['properties'] = dict(
+        name='Corn Seeds',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=59,
+        description='With some water and time, will grow into corn.'
+    )
+    G.nodes['corn_seeds_watered']['properties'] = dict(
+        name='Corn Seeds (Watered)',
+        itemCategory='hide',
+        cloneFrom='corn_seeds',
+        special=['dontCloneReactions', 'cannotBePickedUp']
+    )
+    G.nodes['corn_sprout']['properties'] = dict(
+        name='Corn Sprout',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=58,
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
+    )
+    G.nodes['corn_stalk']['properties'] = dict(
+        name='Corn Stalk',
+        itemCategory='hide',
+        texture='rcfox_farming_crops',
+        sprite=57,
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
+    )
+    G.nodes['corn_stalk_flowering']['properties'] = dict(
+        name='Corn Stalk (flowering)',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=56,
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
+    )
+    G.nodes['corn_ripe']['properties'] = dict(
+        name='Corn (ripe)',
+        itemCategory='plant',
+        texture='rcfox_farming_crops',
+        sprite=55,
+        special=['cannotBePickedUp', 'adjustSpriteYUp8'],
+        description='Ready to be harvested with a slashing tool.',
+        reactions=[
+            MONSTER_EAT_CROP,
+            ItemReaction(element=['slash'],
+                         newID='corn',
+                         action='activate_crop_harvest_ambush')
+        ]
+    )
+    graph_to_plants(expand_graph(G))
+
+    return 'corn_ripe', 'corn'
+
 def define_aldleaf_plant():
     G = networkx.MultiDiGraph()
     G.add_edge('aldleaf', 'aldleafSeeds', element='smash')
@@ -447,7 +537,8 @@ def define_plants():
     with collect_records() as c:
         crops = [
             define_turnip(),
-            define_wheat()
+            define_wheat(),
+            define_corn()
         ]
         define_ambush(crops)
         return c
