@@ -5,6 +5,7 @@ from boatlib.data import (
     ActionAOE,
     ActorPrefab,
     ActorType,
+    ActorTypeDetectAoE,
     AvAffecter,
     AvAffecterAOE,
     GlobalTrigger,
@@ -55,11 +56,17 @@ def define_ambush(crops):
                     faction='player',
                     combatTeam='crop_monster',
                     aiScript='idle',
-                    actorTypeID=ActorType(monster,
+                    actorTypeID=ActorType(f'crop_{monster}',
                                           cloneFrom=monster,
                                           innateActions=munch_crop))
         for monster in ['spide', 'cattle']
     ]
+
+    for monster in monsters:
+        ActorTypeDetectAoE(monster.id,
+                           cloneFrom='detect',
+                           coneAngle=360,
+                           maxRange=10)
 
     spawn_chances = {}
     for i, monster in enumerate(monsters):
@@ -94,9 +101,7 @@ def define_ambush(crops):
                                                         [
                                                             GlobalTriggerEffect('setGlobalVar',
                                                                                 strings=['crop_harvest_ambush'],
-                                                                                floats=[1]),
-                                                            GlobalTriggerEffect('enterCombat',
-                                                                                floats=[99999]),
+                                                                                floats=[1])
                                                         ])))
 
     Action('activate_crop_harvest_ambush',
