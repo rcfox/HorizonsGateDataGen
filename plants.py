@@ -92,7 +92,7 @@ def define_ambush(crops):
                                     useSeparateChanceRoll=True,
                                     chance=spawn_chances[monster.id],
                                     aoe=AvAffecterAOE(cloneFrom='land_search',
-                                                      minRange=4,
+                                                      minRange=2,
                                                       maxRange=6)))
 
     affecters.append(AvAffecter(actorValue='trigger',
