@@ -279,3 +279,7 @@ class ActorType(Serialize):
 
 class ActorTypeReaction(ItemReaction):
     pass
+
+class ActorTypeDetectAoE(Serialize):
+    def __init__(self, actor_id, **kwargs):
+        super().__init__(actor_id, kwargs)
