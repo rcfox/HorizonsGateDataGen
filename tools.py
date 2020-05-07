@@ -121,7 +121,7 @@ def define_scythe():
                                                      actorValue='HP',
                                                      magnitude='d:spearDmg',
                                                      chance='d:spearAcc',
-                                                     element=['melee', 'physical', 'slash']),
+                                                     element=['slash']),
                                       ])
         )
         wood = ItemType('scythe_wood',
@@ -194,7 +194,7 @@ def define_hoe():
                                                      actorValue='HP',
                                                      magnitude='d:spearDmg',
                                                      chance='d:spearAcc',
-                                                     element=['melee', 'physical', 'dig']),
+                                                     element=['dig']),
                                       ])
         )
         wood = ItemType('hoe_wood',
@@ -231,14 +231,28 @@ def define_craftable_fences():
         original_wood_fence_types = ['fence_Mid', 'fence_NW', 'fence_N', 'fence_NE',
                                      'fence_E', 'fence_SE', 'fence_SW', 'fence_W']
         wood_fences = [
-            ItemType(f'{fence}_crafted',
-                     cloneFrom=fence,
-                     description='Use an axe to chop it down.',
+            ItemType(f'{fence_type}_crafted',
+                     cloneFrom=fence_type,
+                     description='Use an axe to chop it down or break it with a physical attack.',
                      reactions=[
-                         ItemReaction(element='heavySlash', newID='woodPlank')
+                         ItemReaction(element='heavySlash', newID='woodPlank'),
+                         ItemReaction(element='physical',
+                                      aiRatingMod=100,
+                                      aiRatingModForHostilesOnly=True,
+                                      newID=ItemType(f'{fence_type}_crafted_weak',
+                                                     cloneFrom=fence_type,
+                                                     pB='zoneWoodDark',
+                                                     description='Looks like it will break with one more hit.',
+                                                     reactions=[
+                                                         ItemReaction(element='physical',
+                                                                      newID='X',
+                                                                      aiRatingMod=100,
+                                                                      aiRatingModForHostilesOnly=True)
+                                                     ]))
                      ])
-            for fence in original_wood_fence_types
+            for fence_type in original_wood_fence_types
         ]
+
 
         kit = ItemType('craft_fence',
                        cloneFrom='craft_sword',
