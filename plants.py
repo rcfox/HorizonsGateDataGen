@@ -1,5 +1,4 @@
 import networkx
-from networkx.drawing.nx_pydot import write_dot as _write_dot
 from boatlib.data import (
     Action,
     ActionAOE,
@@ -547,11 +546,22 @@ def graph_to_plants(G):
             reactions.extend(props.pop('reactions'))
         ItemType(node, reactions=reactions, **props)
 
-def write_dot(G, filename):
-    for e in G.edges:
-        edge = G.edges[e]
-        edge['label'] = edge.pop('element')
-    return _write_dot(G, filename)
+def define_loot():
+    crops_seeds = ['turnip_seeds', 'corn_seeds', 'wheat_seeds']
+    ItemType('loot_crops',
+             name='Crops Loot',
+             sprite=779,
+             value=40,
+             special='replaceWith_toMake_list',
+             toMake=crops_seeds)
+
+    ItemType('loot1',
+             cloneFrom='loot1',
+             toMake='loot_crops')
+
+    ItemType('loot0',
+             cloneFrom='loot0',
+             toMake='loot_crops')
 
 def define_plants():
     with collect_records() as c:
@@ -561,6 +571,7 @@ def define_plants():
             define_corn()
         ]
         define_ambush(crops)
+        define_loot()
         return c
 
 if __name__ == '__main__':
