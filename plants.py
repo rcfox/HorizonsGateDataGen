@@ -297,7 +297,7 @@ def define_corn():
         'slash': 'X'
     }
 
-    G.add_edge('corn_sprout', 'corn_grass', element='newDay', count=3,
+    G.add_edge('corn_sprout', 'corn_stalk', element='newDay', count=3,
                description='It will reach full length in {days} day{s}.',
                element_targets=destruction_elements)
     G.add_edge('corn_stalk', 'corn_stalk_flowering', element='newDay', count=8,
