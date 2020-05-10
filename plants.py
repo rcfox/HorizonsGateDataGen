@@ -132,6 +132,7 @@ def define_turnip():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=0,
+        value=40,
         reactions=[MONSTER_EAT_CROP]
     )
     G.nodes['turnip_seeds']['properties'] = dict(
@@ -302,6 +303,7 @@ def define_corn():
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=54,
+        value=50,
         reactions=[MONSTER_EAT_CROP]
     )
     G.nodes['corn_seeds']['properties'] = dict(
