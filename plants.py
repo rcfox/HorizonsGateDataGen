@@ -48,7 +48,7 @@ def define_ambush(crops):
                           magnitude='d:fistDmg * 1.2',
                           chance='d:fistAcc',
                           weaponAvAffecter=True,
-                          element=['physical', 'melee', 'fakeElec'],
+                          element=['melee', 'fakeElec'],
                           FXOnTile=['pop', 'smash'],)
            ])
 
