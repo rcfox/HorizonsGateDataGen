@@ -267,6 +267,21 @@ class DialogNode(Serialize):
         self.subtypes.append(DialogOption(text, node, **kwargs))
         return self
 
+class DialogNodeOverride(DialogNode):
+    def __init__(self, override_id, **kwargs):
+        kwargs['dialogNodeID_toOverride'] = override_id
+        super().__init__(**kwargs)
+        if 'fReq' in kwargs:
+            self.properties['fReq'] = kwargs['fReq'].replace('__this_node__', self.id)
+
+    @classmethod
+    def not_seen_node(cls, node_id):
+        return f'gIs0:D_{node_id}'
+
+    @classmethod
+    def seen_node(cls, node_id):
+        return f'g1:D_{node_id}'
+
 class DialogOption(Serialize):
     def __init__(self, text, node, **kwargs):
         kwargs['text'] = text
