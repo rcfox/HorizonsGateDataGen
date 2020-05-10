@@ -241,6 +241,7 @@ def define_craftable_fences():
                                       aiRatingModForHostilesOnly=True,
                                       newID=ItemType(f'{fence_type}_crafted_weak',
                                                      cloneFrom=fence_type,
+                                                     name='Fencepost (weak)',
                                                      pB='zoneWoodDark',
                                                      description='Looks like it will break with one more hit.',
                                                      reactions=[
