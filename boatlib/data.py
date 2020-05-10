@@ -117,6 +117,16 @@ class Collection:
     def append(self, item):
         self.items.append(item)
 
+class Comment:
+    def __init__(self, text):
+        self.text = text
+
+        if len(Serialize._collection_stack):
+            Serialize._collection_stack[-1].append(self)
+
+    def serialize(self):
+        return '\n'.join([f'-- {line.strip()}' for line in self.text.split('\n')])
+
 class ItemReaction(Serialize):
     def __init__(self, **kwargs):
         super().__init__(None, kwargs)
