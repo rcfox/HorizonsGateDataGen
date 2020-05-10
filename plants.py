@@ -8,6 +8,7 @@ from boatlib.data import (
     ActorTypeDetectAoE,
     AvAffecter,
     AvAffecterAOE,
+    DialogNodeOverride,
     FormulaGlobal,
     GlobalTrigger,
     GlobalTriggerEffect,
