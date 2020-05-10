@@ -315,7 +315,7 @@ def define_corn():
             G.add_edge(item, target, element=element)
 
     G.nodes['corn']['properties'] = dict(
-        name='Corn',
+        name='Cob of Corn',
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=54,
