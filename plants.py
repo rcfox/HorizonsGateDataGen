@@ -158,6 +158,7 @@ def define_turnip():
         name='Turnip',
         itemCategory='plant',
         texture='rcfox_farming_crops',
+        stackable=True,
         sprite=0,
         value=40,
         reactions=[MONSTER_EAT_CROP]
@@ -329,6 +330,7 @@ def define_corn():
         name='Cob of Corn',
         itemCategory='plant',
         texture='rcfox_farming_crops',
+        stackable=True,
         sprite=54,
         value=50,
         reactions=[MONSTER_EAT_CROP]
