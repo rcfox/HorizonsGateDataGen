@@ -108,8 +108,18 @@ def define_ambush(crops):
                                                                                 strings=['crop_harvest_ambush'],
                                                                                 floats=[1])
                                                         ])))
+    affecters.append(AvAffecter(actorValue='trigger',
+                                chance='100 * gIs0:crop_harvest_ambush',
+                                magnitude=GlobalTrigger('inc_num_crop_harvest_ambushes',
+                                                        [
+                                                            GlobalTriggerEffect('setGlobalVar_math',
+                                                                                strings=[
+                                                                                    'num_crop_harvest_ambushes',
+                                                                                    'g:num_crop_harvest_ambushes + 1'
+                                                                                ])
+                                                        ])))
 
-    for crop_mature, _ in crops:
+    for crop_mature, crop_result in crops:
         Action(f'activate_crop_harvest_ambush_{crop_mature}',
                av_affecters=affecters + [
                    AvAffecter(actorValue='trigger',
