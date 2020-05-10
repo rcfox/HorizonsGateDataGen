@@ -75,6 +75,8 @@ def define_ambush(crops):
         spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * itemsZone:{crop_result}')
     FormulaGlobal('crop_harvest_ambush_chance', ' + '.join(spawn_chance))
 
+    FormulaGlobal('crops_harvested', ' + '.join([f'g:num_{crop_mature}_harvested' for crop_mature, _ in crops]))
+
     spawn_chances = {}
     for i, monster in enumerate(monsters):
         spawn_chances[monster.id] = f'd:crop_harvest_ambush_chance * gIs{i}:crop_harvest_ambush_monster'
@@ -107,8 +109,19 @@ def define_ambush(crops):
                                                                                 floats=[1])
                                                         ])))
 
-    Action('activate_crop_harvest_ambush',
-           av_affecters=affecters)
+    for crop_mature, _ in crops:
+        Action(f'activate_crop_harvest_ambush_{crop_mature}',
+               av_affecters=affecters + [
+                   AvAffecter(actorValue='trigger',
+                              magnitude=GlobalTrigger(f'inc_{crop_mature}_harvested',
+                                                      [
+                                                          GlobalTriggerEffect('setGlobalVar_math',
+                                                                              strings=[
+                                                                                  f'num_{crop_mature}_harvested',
+                                                                                  f'g:num_{crop_mature}_harvested + 1'
+                                                                              ])
+                                                      ]))
+               ])
 
 def define_turnip():
     G = networkx.MultiDiGraph()
@@ -176,7 +189,7 @@ def define_turnip():
             MONSTER_EAT_CROP,
             ItemReaction(element=['use', 'dig'],
                          newID='turnip',
-                         action='activate_crop_harvest_ambush')
+                         action='activate_crop_harvest_ambush_turnip_mature')
         ]
     )
     graph_to_plants(expand_graph(G))
@@ -263,7 +276,7 @@ def define_wheat():
             MONSTER_EAT_CROP,
             ItemReaction(element=['slash'],
                          newID='cargo_grain',
-                         action='activate_crop_harvest_ambush')
+                         action='activate_crop_harvest_ambush_wheat_ripe')
         ]
     )
     graph_to_plants(expand_graph(G))
@@ -354,7 +367,7 @@ def define_corn():
             MONSTER_EAT_CROP,
             ItemReaction(element=['slash'],
                          newID='corn',
-                         action='activate_crop_harvest_ambush')
+                         action='activate_crop_harvest_ambush_corn_ripe')
         ]
     )
     graph_to_plants(expand_graph(G))
