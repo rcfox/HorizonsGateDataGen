@@ -8,6 +8,7 @@ from boatlib.data import (
     ActorTypeDetectAoE,
     AvAffecter,
     AvAffecterAOE,
+    FormulaGlobal,
     GlobalTrigger,
     GlobalTriggerEffect,
     ItemReaction,
@@ -68,13 +69,15 @@ def define_ambush(crops):
                            coneAngle=360,
                            maxRange=10)
 
+    spawn_chance = [f'9 * gIs0:crop_harvest_ambush']
+    for crop_mature, crop_result in crops:
+        spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * itemsZone:{crop_mature}')
+        spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * itemsZone:{crop_result}')
+    FormulaGlobal('crop_harvest_ambush_chance', ' + '.join(spawn_chance))
+
     spawn_chances = {}
     for i, monster in enumerate(monsters):
-        spawn_chance = [f'9 * gIs0:crop_harvest_ambush * gIs{i}:crop_harvest_ambush_monster']
-        for crop_mature, crop_result in crops:
-            spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * gIs{i}:crop_harvest_ambush_monster * itemsZone:{crop_mature}')
-            spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * gIs{i}:crop_harvest_ambush_monster * itemsZone:{crop_result}')
-        spawn_chances[monster.id] = ' + '.join(spawn_chance)
+        spawn_chances[monster.id] = f'd:crop_harvest_ambush_chance * gIs{i}:crop_harvest_ambush_monster'
 
     affecters = [
         AvAffecter(actorValue='trigger',
