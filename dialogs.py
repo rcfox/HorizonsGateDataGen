@@ -19,21 +19,43 @@ from boatlib.data import (
 )
 
 def define_hints():
-    crops = [('turnip_mature', 'turnip'),
-             ('corn_ripe', 'corn')]
 
-    for crop_mature, crop_result in crops:
+    DialogNodeOverride('enterOverworld',
+                       dialog_id=f'reeve_enterOverworld_found_seeds',
+                       fReq=' + '.join([
+                           ' * '.join([
+                               'partyOrCrew:reeve',
+                               f'partyItem:{seeds}',
+                               DialogNodeOverride.not_seen_node('crops_offer_help'),
+                               DialogNodeOverride.not_seen_node('__this_node__'),
+                           ]) for seeds in ['turnip_seeds', 'corn_seeds', 'wheat_seeds']
+                       ]),
+                       speakerOverride='reeve',
+                       statements=[
+                           '''Commodore, we've found some strange seeds. What should we do with them?''',
+                           '''Say, wasn't there a gardener in Fantlin?''',
+                           '''Maybe they'll know something about the seeds.'''
+                       ],
+                       nextNodeID=DialogNode('reeve_enterOverworld_found_seeds_journal',
+                                             specialEffect=[
+                                                 'preventInteraction,1',
+                                                 'openJournal,@0.5,0',
+                                                 'addJournalGoal,@1,* Find the gardener in Fantlin.'
+                                             ]))
+
+    for crop in ['turnip', 'corn']:
         DialogNodeOverride('enterOverworld',
-                           dialog_id=f'reeve_enterOverworld_{crop_result}',
+                           dialog_id=f'reeve_enterOverworld_{crop}',
                            fReq=' * '.join([
                                'partyOrCrew:reeve',
-                               'g1:D_class_balancer2',
-                               f'g1:num_{crop_mature}_harvested',
-                               DialogNodeOverride.NOT_SEEN_THIS,
+                               f'partyItem:{crop}',
+                               DialogNodeOverride.seen_node('class_balancer2'),
+                               DialogNodeOverride.not_seen_node(f'crops_report_gave_{crop}'),
+                               DialogNodeOverride.not_seen_node('__this_node__')
                            ]),
                            speakerOverride='reeve',
                            statements=[
-                               ('happy', f'''Commodore, we've harvested a <itemName={crop_result}>!'''),
+                               ('happy', f'''Commodore, we've harvested a <itemName={crop}>!'''),
                                'We should show it to Roland in Fantlin.'
                            ])
 
@@ -41,9 +63,9 @@ def define_hints():
                        dialog_id='reeve_enterOverworld_ambushes',
                        fReq=' * '.join([
                            'partyOrCrew:reeve',
-                           'g1:D_class_balancer2',
                            'gIsMoreThan:num_crop_harvest_ambushes:4',
-                           DialogNodeOverride.NOT_SEEN_THIS,
+                           DialogNodeOverride.seen_node('class_balancer2'),
+                           DialogNodeOverride.not_seen_node('__this_node__'),
                        ]),
                        speakerOverride='reeve',
                        statements=[
@@ -56,7 +78,7 @@ def define_buy_seeds(crop_seeds):
     buy_seeds = DialogNode('crops_buy_seeds',
                            statements=[
                                f'I can give you 10 seeds for $100.',
-                               ('sly', '''Of course, there's probably some way you could get more yourself...''')
+                               ('sly', '''Of course, there's probably some way you could squeeze more out yourself...''')
                            ])
     for seeds in crop_seeds:
         buy_seeds.add_option(f'Buy 10 <itemName={seeds}> ($100)', '',
@@ -100,7 +122,7 @@ def define_report_crops():
                                                                                 'removeItemFromParty,turnip,10',
                                                                                 'giveItem,craft_watering_can,1'
                                                                             ]),
-                    formulaReq='gIs1:D_crops_report_gave_turnip * gIs0:D_crops_report_gave_10_turnip * partyItem:turnip - 9')
+                    formulaReq='g1:D_crops_report_gave_turnip * gIs0:D_crops_report_gave_10_turnip * partyItem:turnip - 9')
         .add_option('Give<itemBig=corn> <itemName=corn>', DialogNode('crops_report_gave_corn',
                                                                      statements=[
                                                                          ('happy', 'Wow, corn! Good job.'),
@@ -122,7 +144,7 @@ def define_report_crops():
                                                                             'removeItemFromParty,corn,10',
                                                                             'giveItem,craft_scythe,1'
                                                                         ]),
-                    formulaReq='gIs1:D_crops_report_gave_corn * gIs0:D_crops_report_gave_10_corn * partyItem:corn - 9')
+                    formulaReq='g1:D_crops_report_gave_corn * gIs0:D_crops_report_gave_10_corn * partyItem:corn - 9')
         .add_option('Pests keep attacking my crops!', DialogNode('crops_report_pests',
                                                                  statements=[
                                                                      ('concern', 'Yes, many creatures do enjoy the taste of fresh vegetables, and not just humanoids.'),
@@ -155,7 +177,11 @@ def define_roland_extra_dialog():
                                                    'giveItem,watering_can_wood,1'
                                                ] + [
                                                    f'giveItem,{seeds},2' for seeds in crop_seeds
-                                               ]),
+                                               ],
+                                               nextNodeID=DialogNode('crops_offer_help_journal',
+                                                                     specialEffect=[
+                                                                         'completeJournalGoal,@0.5,* Find the gardener in Fantlin.'
+                                                                     ])),
                  formulaReq='gIs0:D_crops_offer_help',
                  ID='class_balancer2')
 
@@ -164,12 +190,11 @@ def define_roland_extra_dialog():
                  bottomOption=True)
 
     DialogOption(f'Buy seeds', define_buy_seeds(crop_seeds),
-                 formulaReq='gIs1:D_crops_offer_help',
-                 newLineOfOptions=True,
+                 formulaReq='g1:D_crops_offer_help',
                  ID='class_balancer2')
 
     DialogOption(f'Report', define_report_crops(),
-                 formulaReq='gIs1:D_crops_offer_help',
+                 formulaReq='g1:D_crops_offer_help',
                  newLineOfOptions=True,
                  ID='class_balancer2')
 
