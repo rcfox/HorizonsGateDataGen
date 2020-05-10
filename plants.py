@@ -120,19 +120,8 @@ def define_ambush(crops):
                                                                                 ])
                                                         ])))
 
-    for crop_mature, crop_result in crops:
-        Action(f'activate_crop_harvest_ambush_{crop_mature}',
-               av_affecters=affecters + [
-                   AvAffecter(actorValue='trigger',
-                              magnitude=GlobalTrigger(f'inc_{crop_mature}_harvested',
-                                                      [
-                                                          GlobalTriggerEffect('setGlobalVar_math',
-                                                                              strings=[
-                                                                                  f'num_{crop_mature}_harvested',
-                                                                                  f'g:num_{crop_mature}_harvested + 1'
-                                                                              ])
-                                                      ]))
-               ])
+    Action('activate_crop_harvest_ambush',
+           av_affecters=affecters)
 
 def define_turnip():
     G = networkx.MultiDiGraph()
@@ -201,7 +190,7 @@ def define_turnip():
             MONSTER_EAT_CROP,
             ItemReaction(element=['use', 'dig'],
                          newID='turnip',
-                         action='activate_crop_harvest_ambush_turnip_mature')
+                         action='activate_crop_harvest_ambush')
         ]
     )
     graph_to_plants(expand_graph(G))
@@ -288,7 +277,7 @@ def define_wheat():
             MONSTER_EAT_CROP,
             ItemReaction(element=['slash'],
                          newID='cargo_grain',
-                         action='activate_crop_harvest_ambush_wheat_ripe')
+                         action='activate_crop_harvest_ambush')
         ]
     )
     graph_to_plants(expand_graph(G))
@@ -380,7 +369,7 @@ def define_corn():
             MONSTER_EAT_CROP,
             ItemReaction(element=['slash'],
                          newID='corn',
-                         action='activate_crop_harvest_ambush_corn_ripe')
+                         action='activate_crop_harvest_ambush')
         ]
     )
     graph_to_plants(expand_graph(G))
