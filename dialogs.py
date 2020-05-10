@@ -33,7 +33,7 @@ def define_hints():
                        speakerOverride='reeve',
                        statements=[
                            '''Commodore, we've found some strange seeds. What should we do with them?''',
-                           '''Say, wasn't there a gardener in Fantlin?''',
+                           '''Say, wasn't there a gardener in <color=DarkRed>Fantlin<color=>?''',
                            '''Maybe they'll know something about the seeds.'''
                        ],
                        nextNodeID=DialogNode('reeve_enterOverworld_found_seeds_journal',
@@ -56,7 +56,7 @@ def define_hints():
                            speakerOverride='reeve',
                            statements=[
                                ('happy', f'''Commodore, we've harvested a <itemName={crop}>!'''),
-                               'We should show it to Roland in Fantlin.'
+                               'We should show it to Roland in <color=DarkRed>Fantlin<color=>.'
                            ])
 
     DialogNodeOverride('enterOverworld',
@@ -70,7 +70,7 @@ def define_hints():
                        speakerOverride='reeve',
                        statements=[
                            ('angry', 'Commodore, these pests attacking our crops are getting out of hand!'),
-                           ('sly', 'Perhaps Roland in Fantlin knows a way to help protect them.')
+                           ('sly', 'Perhaps Roland in <color=DarkRed>Fantlin<color=> knows a way to help protect them.')
                        ])
 
 
@@ -198,8 +198,32 @@ def define_roland_extra_dialog():
                  newLineOfOptions=True,
                  ID='class_balancer2')
 
+def define_cafe_gossip():
+    DialogNodeOverride('cafe_gossip',
+                       dialog_id='cafe_gossip_crops_gardener',
+                       fReq=' + '.join([
+                           ' * '.join([
+                               DialogNodeOverride.not_seen_node('__this_node__'),
+                               DialogNodeOverride.not_seen_node('crops_offer_help'),
+                           ]),
+                           ' * '.join([
+                               DialogNodeOverride.seen_node('__this_node__'),
+                               'm:rand(5)',
+                               DialogNodeOverride.not_seen_node('crops_offer_help')
+                           ]),
+                           ' * '.join([
+                               '4',
+                               DialogNodeOverride.seen_node('__this_node__'),
+                               '-1'
+                           ])
+                       ]),
+                       statements=[
+                           '''They say there's a gardener in <color=DarkRed>Fantlin<color=> who is researching plant growth.'''
+                       ])
+
 def define_dialogs():
     with collect_records() as c:
         define_hints()
         define_roland_extra_dialog()
+        define_cafe_gossip()
         return c
