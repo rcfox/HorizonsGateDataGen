@@ -308,3 +308,7 @@ class ActorTypeReaction(ItemReaction):
 class ActorTypeDetectAoE(Serialize):
     def __init__(self, actor_id, **kwargs):
         super().__init__(actor_id, kwargs)
+
+class FormulaGlobal(Serialize):
+    def __init__(self, formula_id, formula):
+        super().__init__(formula_id, {'formula': formula})
