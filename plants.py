@@ -104,19 +104,17 @@ def define_ambush(crops):
                                                         [
                                                             GlobalTriggerEffect('setGlobalVar',
                                                                                 strings=['crop_harvest_ambush'],
-                                                                                floats=[1])
-                                                        ])))
-    affecters.append(AvAffecter(actorValue='trigger',
-                                chance='100 * gIs0:crop_harvest_ambush',
-                                magnitude=GlobalTrigger('inc_num_crop_harvest_ambushes',
-                                                        [
+                                                                                floats=[1]),
+                                                            GlobalTriggerEffect('cancelIfEnemiesNotPresent',
+                                                                                floats=[0]),
                                                             GlobalTriggerEffect('setGlobalVar_math',
                                                                                 strings=[
                                                                                     'num_crop_harvest_ambushes',
                                                                                     'g:num_crop_harvest_ambushes + 1'
-                                                                                ])
+                                                                                ]),
+                                                            GlobalTriggerEffect('enterCombat',
+                                                                                floats=[9999999])
                                                         ])))
-
     Action('activate_crop_harvest_ambush',
            av_affecters=affecters)
 
