@@ -75,8 +75,6 @@ def define_ambush(crops):
         spawn_chance.append(f'0.1 * gIs0:crop_harvest_ambush * itemsZone:{crop_result}')
     FormulaGlobal('crop_harvest_ambush_chance', ' + '.join(spawn_chance))
 
-    FormulaGlobal('crops_harvested', ' + '.join([f'g:num_{crop_mature}_harvested' for crop_mature, _ in crops]))
-
     spawn_chances = {}
     for i, monster in enumerate(monsters):
         spawn_chances[monster.id] = f'd:crop_harvest_ambush_chance * gIs{i}:crop_harvest_ambush_monster'
