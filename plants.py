@@ -86,7 +86,7 @@ def define_ambush(crops):
                                            [
                                                GlobalTriggerEffect('setGlobalVar_math',
                                                                    strings=['crop_harvest_ambush_monster',
-                                                                            'm:rand'])
+                                                                            'm:rand(4)'])
                                            ]))
     ]
     for monster in monsters:
