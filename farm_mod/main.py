@@ -8,7 +8,7 @@ if __name__ == '__main__':
         boatlib.data.Comment('''
         Horizon's Gate Farming Mod
         Version: 1.1
-        By: rcfox (https://github.com/rcfox/HorizonsGateFarmMod)
+        By: rcfox (https://github.com/rcfox/HorizonsGateMods)
         Crop sprites by: josehzz (https://opengameart.org/content/farming-crops-16x16)
         ''')
         tools.define_tools()
