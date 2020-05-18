@@ -145,7 +145,7 @@ def define_turnip():
                            rarity=2,
                            title='Turnip',
                            icons=['turnip_sprout', 'turnip_mature', 'turnip'],
-                           text='This is some text.')
+                           text='A versatile vegetable with both edible roots and leaves. Sprouts from a seed in 3 days and fully matures 7 days later, with occasional watering.')
 
     G.nodes['turnip']['properties'] = dict(
         name='Turnip',
@@ -159,6 +159,7 @@ def define_turnip():
     )
     G.nodes['turnip_seeds']['properties'] = dict(
         name='Turnip Seeds',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=5,
@@ -166,6 +167,7 @@ def define_turnip():
     )
     G.nodes['turnip_seeds_watered']['properties'] = dict(
         name='Turnip Seeds (Watered)',
+        journalID=journal,
         itemCategory='hide',
         cloneFrom='turnip_seeds',
         special=['dontCloneReactions', 'cannotBePickedUp']
@@ -242,7 +244,7 @@ def define_wheat():
                            rarity=2,
                            title='Wheat',
                            icons=['wheat_sprout', 'wheat_grass', 'wheat_grass_flowering', 'wheat_ripe'],
-                           text='This is some text.')
+                           text='A grass cultivated for its seeds, which have a variety of uses. Fully grows after 21 days.')
 
     G.nodes['cargo_grain']['properties'] = dict(
         cloneFrom='cargo_grain',
@@ -251,6 +253,7 @@ def define_wheat():
     )
     G.nodes['wheat_seeds']['properties'] = dict(
         name='Wheat Seeds',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=35,
@@ -258,6 +261,7 @@ def define_wheat():
     )
     G.nodes['wheat_seeds_watered']['properties'] = dict(
         name='Wheat Seeds (Watered)',
+        journalID=journal,
         itemCategory='hide',
         cloneFrom='wheat_seeds',
         special=['dontCloneReactions', 'cannotBePickedUp']
@@ -342,7 +346,7 @@ def define_corn():
                            rarity=2,
                            title='Corn',
                            icons=['corn_sprout', 'corn_stalk', 'corn_stalk_flowering', 'corn_ripe', 'corn'],
-                           text='This is some text.')
+                           text='A tall, leafy plant that produces fruit as a cluster of sweet kernels. Fully grows after 23 days with only an minimal watering.')
 
     G.nodes['corn']['properties'] = dict(
         name='Cob of Corn',
@@ -356,6 +360,7 @@ def define_corn():
     )
     G.nodes['corn_seeds']['properties'] = dict(
         name='Corn Seeds',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=59,
@@ -363,6 +368,7 @@ def define_corn():
     )
     G.nodes['corn_seeds_watered']['properties'] = dict(
         name='Corn Seeds (Watered)',
+        journalID=journal,
         itemCategory='hide',
         cloneFrom='corn_seeds',
         special=['dontCloneReactions', 'cannotBePickedUp']
@@ -378,7 +384,7 @@ def define_corn():
     G.nodes['corn_stalk']['properties'] = dict(
         name='Corn Stalk',
         journalID=journal,
-        itemCategory='hide',
+        itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=57,
         special=['cannotBePickedUp', 'adjustSpriteYUp8'],
