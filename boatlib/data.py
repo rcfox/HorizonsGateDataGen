@@ -312,3 +312,19 @@ class ActorTypeDetectAoE(Serialize):
 class FormulaGlobal(Serialize):
     def __init__(self, formula_id, formula):
         super().__init__(formula_id, {'formula': formula})
+
+class JournalEntry(Serialize):
+    def __init__(self, journal_id, icons=None, title=None, text='', **kwargs):
+        if title is None:
+            raise ValueError('title cannot be None for JournalEntry')
+
+        text_parts = []
+        if icons:
+            text_parts.extend(f'<itemBig={icon}>' for icon in icons)
+        text_parts.append(f'<title={title}>')
+        text_parts.append('<brAdj=>')
+        text_parts.append(text)
+
+        kwargs['text'] = ''.join(text_parts)
+
+        super().__init__(journal_id, kwargs)
