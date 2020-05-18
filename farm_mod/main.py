@@ -1,7 +1,7 @@
 import boatlib.data
-import plants
-import tools
-import dialogs
+from . import plants
+from . import tools
+from . import dialogs
 
 if __name__ == '__main__':
     with boatlib.data.collect_records() as c:
