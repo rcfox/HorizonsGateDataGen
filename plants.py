@@ -13,6 +13,7 @@ from boatlib.data import (
     GlobalTriggerEffect,
     ItemReaction,
     ItemType,
+    JournalEntry,
     collect_records,
     generate_id
 )
@@ -138,8 +139,17 @@ def define_turnip():
     G.add_edge('turnip_sprout', 'fire_small', element='fire')
     G.add_edge('turnip_mature', 'fire_small', element='fire')
 
+    journal = JournalEntry('journal_turnip',
+                           category='item',
+                           halfPage=True,
+                           rarity=2,
+                           title='Turnip',
+                           icons=['turnip_sprout', 'turnip_mature', 'turnip'],
+                           text='This is some text.')
+
     G.nodes['turnip']['properties'] = dict(
         name='Turnip',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         stackable=True,
@@ -162,6 +172,7 @@ def define_turnip():
     )
     G.nodes['turnip_sprout']['properties'] = dict(
         name='Turnip Sprout',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=2,
@@ -170,12 +181,14 @@ def define_turnip():
     )
     G.nodes['turnip_sprout_watered']['properties'] = dict(
         name='Turnip Sprout (watered)',
+        journalID=journal,
         itemCategory='hide',
         cloneFrom='turnip_sprout',
         special=['dontCloneReactions', 'cannotBePickedUp', 'adjustSpriteYUp8']
     )
     G.nodes['turnip_mature']['properties'] = dict(
         name='Turnip (mature)',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=1,
@@ -222,6 +235,15 @@ def define_wheat():
         for element, target in destruction_elements.items():
             G.add_edge(item, target, element=element)
 
+
+    journal = JournalEntry('journal_wheat',
+                           category='item',
+                           halfPage=True,
+                           rarity=2,
+                           title='Wheat',
+                           icons=['wheat_sprout', 'wheat_grass', 'wheat_grass_flowering', 'wheat_ripe'],
+                           text='This is some text.')
+
     G.nodes['cargo_grain']['properties'] = dict(
         cloneFrom='cargo_grain',
         description='Hard, dry seed. Smash the crate open to get seeds you can plant.',
@@ -242,6 +264,7 @@ def define_wheat():
     )
     G.nodes['wheat_sprout']['properties'] = dict(
         name='Wheat Sprout',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=34,
@@ -249,6 +272,7 @@ def define_wheat():
     )
     G.nodes['wheat_grass']['properties'] = dict(
         name='Wheat Grass',
+        journalID=journal,
         itemCategory='hide',
         texture='rcfox_farming_crops',
         sprite=33,
@@ -256,6 +280,7 @@ def define_wheat():
     )
     G.nodes['wheat_grass_flowering']['properties'] = dict(
         name='Wheat Grass (flowering)',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=32,
@@ -263,6 +288,7 @@ def define_wheat():
     )
     G.nodes['wheat_ripe']['properties'] = dict(
         name='Wheat (ripe)',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=31,
@@ -310,8 +336,17 @@ def define_corn():
         for element, target in destruction_elements.items():
             G.add_edge(item, target, element=element)
 
+    journal = JournalEntry('journal_corn',
+                           category='item',
+                           halfPage=True,
+                           rarity=2,
+                           title='Corn',
+                           icons=['corn_sprout', 'corn_stalk', 'corn_stalk_flowering', 'corn_ripe', 'corn'],
+                           text='This is some text.')
+
     G.nodes['corn']['properties'] = dict(
         name='Cob of Corn',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         stackable=True,
@@ -334,6 +369,7 @@ def define_corn():
     )
     G.nodes['corn_sprout']['properties'] = dict(
         name='Corn Sprout',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=58,
@@ -341,6 +377,7 @@ def define_corn():
     )
     G.nodes['corn_stalk']['properties'] = dict(
         name='Corn Stalk',
+        journalID=journal,
         itemCategory='hide',
         texture='rcfox_farming_crops',
         sprite=57,
@@ -348,6 +385,7 @@ def define_corn():
     )
     G.nodes['corn_stalk_flowering']['properties'] = dict(
         name='Corn Stalk (flowering)',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=56,
@@ -355,6 +393,7 @@ def define_corn():
     )
     G.nodes['corn_ripe']['properties'] = dict(
         name='Corn (ripe)',
+        journalID=journal,
         itemCategory='plant',
         texture='rcfox_farming_crops',
         sprite=55,
