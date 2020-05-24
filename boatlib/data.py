@@ -1,3 +1,4 @@
+import re
 import uuid
 import contextlib
 import collections
@@ -47,6 +48,49 @@ class Duration:
         if count < 1:
             raise ValueError('count must be greater than 0')
         return -3 - count
+
+class Parser:
+
+    @staticmethod
+    def parse(data):
+        data = re.sub(r'--.*\n', '', data)
+        raw_records = data.strip().split('[')
+        records = []
+        for r in raw_records:
+            if not r.strip():
+                continue
+            record = {}
+            record_name, record_data = r.split(']')
+            record_fields = record_data.strip().split(';')
+            record['__type__'] = record_name
+            for field in record_fields:
+                field = field.strip()
+                if field:
+                    key, value = field.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+
+                    if value.lower() == 'true':
+                        value = True
+                    elif value.lower() == 'false':
+                        value = False
+                    else:
+                        try:
+                            value = int(value)
+                        except ValueError:
+                            try:
+                                value = float(value)
+                            except ValueError:
+                                pass
+
+                    if key not in record:
+                        record[key] = value
+                    else:
+                        if not isinstance(record[key], list):
+                            record[key] = [record[key]]
+                        record[key].append(value)
+            records.append(record)
+        return records
 
 class Serialize:
     _collection_stack = collections.deque([])
