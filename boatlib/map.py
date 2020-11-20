@@ -1,7 +1,9 @@
 import math
+import functools
 
 from .data import Parser
 
+from dijkstar import Graph
 import pyclipper
 from PIL import Image, ImageDraw, ImageFont
 
@@ -57,11 +59,13 @@ class Map:
             draw.text((text_x - text_width / 2, text_y), text, font=self.font, stroke_fill=(0, 0, 0, 255), stroke_width=1)
 
     def draw_line(self, line, color=(255, 0, 0, 255), draw_points=False):
+        p1, p2 = line
+        p1_ = self.scale_point(p1)
+        p2_ = self.scale_point(p2)
         draw = ImageDraw.Draw(self.img)
-        draw.line(line, fill=color, width=1)
+        draw.line((p1_, p2_), fill=color, width=1)
 
         if draw_points:
-            p1, p2 = line
             self.draw_point(p1, color=color)
             self.draw_point(p2, color=color)
 
@@ -106,6 +110,10 @@ class Map:
                             if mostly_blue(p) and (white(middle) or not mostly_blue(middle)):
                                 point_coords.add((x,y))
 
+        return point_coords
+
+    def get_coast_lines(self):
+        point_coords = self.parse_coats()
         lines = []
         for x, y in point_coords:
             for dx in (-1, 0, 1):
@@ -117,7 +125,7 @@ class Map:
                             lines.append(((x, y), (x2, y2)))
         return lines
 
-    def filter_invalid_points(self, lines):
+    def filter_invalid_points(self, points):
         lake_points = list(self.get_lake_points())
         def near_lake_points(point):
             for p in lake_points:
@@ -125,9 +133,7 @@ class Map:
                     return True
             return False
 
-        for p1, p2 in lines:
-            if not near_lake_points(p1):
-                yield (p1, p2)
+        return [p for p in points if not near_lake_points(p)]
 
     def scale_lines(self, lines, scale):
         scaled_lines = []
@@ -172,3 +178,65 @@ class Map:
             x1, y1 = p1
             x2, y2 = p2
             yield ((x1 / scale, y1 / scale), (x2 / scale, y2 / scale))
+
+
+    @functools.lru_cache
+    def find_rivers(self):
+        img = self.img_orig
+        points = []
+
+        # Don't try to parse the edges of the map
+        inset = 10
+        for x in range(inset, img.width - inset):
+            for y in range(inset, img.height - inset):
+
+                middle = img.getpixel((x, y))
+                if not mostly_blue(middle):
+                    continue
+
+                count = 1
+                for dx in range(-3, 4):
+                    for dy in range(-3, 4):
+                        if not (dx == 0 and dy == 0):
+                            p = img.getpixel((x+dx, y+dy))
+                            if mostly_blue(p):
+                                count += 1
+
+                c = min(255, 20 * max(0, 256 // count - 256 // 49))
+                if c > 100:
+                    points.append((x, y))
+
+        return points
+
+    def create_water_graph(self):
+        img = self.img_orig
+        graph = Graph(undirected=True)
+
+        inset = 10
+        for y in range(inset, img.height - inset):
+            for x in range(inset, img.width - inset):
+                p1 = (x, y)
+
+                if not mostly_blue(img.getpixel(p1)):
+                    continue
+
+                #for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        if not (dx == 0 and dy == 0):
+                            p2 = (x + dx, y + dy)
+                            if mostly_blue(img.getpixel(p2)):
+                                graph.add_edge(p1, p2, 5 * dist_sq(p1, p2))
+
+        for x, y in self.find_rivers():
+            p1 = (x, y)
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    if not (dx == 0 and dy == 0):
+                        p2 = (x + dx, y + dy)
+                        if mostly_blue(img.getpixel(p2)):
+                            graph.add_edge(p1, p2, dist_sq(p1, p2))
+                        #for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+
+
+        return graph

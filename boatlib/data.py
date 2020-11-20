@@ -53,7 +53,7 @@ class Parser:
 
     @staticmethod
     def parse(data):
-        data = re.sub(r'--.*\n', '', data)
+        data = re.sub(r'--.*\n|//.*\n', '', data)
         raw_records = data.strip().split('[')
         records = []
         for r in raw_records:
@@ -65,8 +65,12 @@ class Parser:
             record['__type__'] = record_name
             for field in record_fields:
                 field = field.strip()
-                if field:
-                    key, value = field.split('=', 1)
+                if field not in ('', 'Tactics.AreaOfEffect'):
+                    try:
+                        key, value = field.split('=', 1)
+                    except:
+                        print('----', field)
+                        raise
                     key = key.strip()
                     value = value.strip()
 
