@@ -99,6 +99,7 @@ def add_dialog(item):
                          buy_node,
                          newLineOfOptions=True,
                          ID=node)
+        DialogOption('Goodbye', '', bottomOption=True, ID=f'port{port}_dojo4')
 
 
 if __name__ == '__main__':
