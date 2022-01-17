@@ -49,12 +49,12 @@ newID=X;
 	actorValue=summonItem;
 	magnitude=rcfox_hurlighter;
 	duration=1;
-	
-	-- Prevents multiple hurlighters from being created at the same spot.
-	-- Otherwise, we'd end up with weight > 10 just from hurlighters and
-	-- they'd never react to pressurePlateUp.
-	-- This requires a fix mentioned at https://discord.com/channels/685974230512566289/685974668653756417/932464545656635482
-	fReq=1 - itemAt:rcfox_hurlighter;
+
 [AvAffecterAoE]
 	ID=Gla_throwWeapon;
 	cloneFrom=oneTile;
+
+	-- Prevents multiple hurlighters from being created at the same spot.
+	-- Otherwise, we'd end up with weight > 10 just from hurlighters and
+	-- they'd never react to pressurePlateUp.
+	fReq=1 - itemAt:rcfox_hurlighter;
