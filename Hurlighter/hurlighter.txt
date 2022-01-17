@@ -1,0 +1,60 @@
+[FXData]
+-- Copied from chargeSpiralFast_many
+ID=rcfox_hurlighter_fx;
+particleID=pixelMovingInward;
+numParticles=15;
+randRot=359;
+randScale=1;
+randScaleVeloc=0.2;
+initialDelayIncreasePerParticle=0.04;
+rotVelocOffset=270;
+scaleOffset=0.2;
+
+-- Make the FX go above everything so we can always see it.
+depthMod=9999;
+
+[ItemType]  name=Hurlighter;
+ID=rcfox_hurlighter;
+description=Highlights weapons that have been hurled.; 
+
+-- Most hurled weapons should have a weight >= 1, and weight < 10 is required
+-- to activate pressurePlateUp. This allows us to react to an item being picked up
+-- but not actors walking over it.
+weight=9;
+
+special=reactsToPressure; special=cannotBePickedUp; special=canAlwaysFitInTileWhenSpawned;
+special=showOnMinimap; special=invisible;
+spawnFX=rcfox_hurlighter_fx;
+spawnFXColor=Magenta;
+sprite=175;
+texture=items_weapons;
+
+[ItemLight]
+-- Make sure we can see it in the dark.
+ID=rcfox_hurlighter;
+red=1.0; blue=1.0; green=0; alpha=0.6; size=0.1; flicker=0;
+
+[ItemReaction]
+-- If a hurlighter doesn't go away for some reason (like it landed on another item),
+-- we can just double-click it away.
+ID=rcfox_hurlighter;
+element=pressurePlateUp;
+element=use;
+newID=X;
+
+-- Add a new step to the Gladiator's Hurl Weapon to spawn the Hurlighter
+-- at the same place where the weapon landed.
+[AvAffecter]
+	ID=Gla_throwWeapon; 
+	actorValue=summonItem;
+	magnitude=rcfox_hurlighter;
+	duration=1;
+	
+	-- Prevents multiple hurlighters from being created at the same spot.
+	-- Otherwise, we'd end up with weight > 10 just from hurlighters and
+	-- they'd never react to pressurePlateUp.
+	-- This requires a fix mentioned at https://discord.com/channels/685974230512566289/685974668653756417/932464545656635482
+	fReq=1 - itemAt:rcfox_hurlighter;
+[AvAffecterAoE]
+	ID=Gla_throwWeapon;
+	cloneFrom=oneTile;
