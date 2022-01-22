@@ -1,14 +1,14 @@
 [FXData]
--- Copied from chargeSpiralFast_many
+-- Adapted from pixelSpinCircle
 ID=rcfox_hurlighter_fx;
-particleID=pixelMovingInward;
-numParticles=15;
-randRot=359;
-randScale=1;
-randScaleVeloc=0.2;
-initialDelayIncreasePerParticle=0.04;
-rotVelocOffset=270;
-scaleOffset=0.2;
+particleID=pixelSuspendedNear;
+numParticles=30;
+randRot=0;
+randScale=0;
+randScaleVeloc=0;
+initialDelayIncreasePerParticle=0.01;
+rotVelocOffset=870;
+scaleOffset=0.5;
 
 -- Make the FX go above everything so we can always see it.
 depthMod=9999;
@@ -25,9 +25,10 @@ weight=9;
 special=reactsToPressure; special=cannotBePickedUp; special=canAlwaysFitInTileWhenSpawned;
 special=showOnMinimap; special=invisible;
 spawnFX=rcfox_hurlighter_fx;
-spawnFXColor=Magenta;
+spawnFXColor=Red;
 sprite=175;
 texture=items_weapons;
+depthMod=9999;
 
 [ItemLight]
 -- Make sure we can see it in the dark.
